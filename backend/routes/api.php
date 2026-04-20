@@ -14,4 +14,7 @@ use App\Models\User;
 //});
 
 Route::apiResource('users', UserController::class);
-
+Route::prefix('recuperation')->group(function () {
+    Route::post('users', [UserController::class, 'forgot_password']);
+    Route::put('users', [UserController::class, 'reset_password']);
+});
