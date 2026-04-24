@@ -2,8 +2,9 @@ import { Search, ShoppingCart, User, MapPin, Heart, Menu } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
-
+import { useAuth } from "@/contexts/AuthContext";
 const Header = () => {
+  const { isAuthenticated, user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { totalItems } = useCart();
@@ -45,10 +46,13 @@ const Header = () => {
 
           {/* Actions */}
           <div className="hidden md:flex items-center gap-5">
-            <a href="#" className="flex flex-col items-center text-primary-foreground hover:opacity-80 transition-opacity">
+            <button 
+              className="relative flex flex-col items-center text-primary-foreground hover:opacity-80 transition-opacity"
+              onClick={() => navigate(isAuthenticated ? "/profile" : "/auth")}
+            >
               <User className="h-5 w-5" />
-              <span className="text-[10px] mt-0.5 font-medium">Conta</span>
-            </a>
+              <span className="text-[10px] mt-0.5 font-medium">{loading ? "..." : user?.name ? `Olá, ${user.name.split(" ")[0]}` : "Conta"}</ span> 
+            </button>
             <a href="#" className="flex flex-col items-center text-primary-foreground hover:opacity-80 transition-opacity">
               <Heart className="h-5 w-5" />
               <span className="text-[10px] mt-0.5 font-medium">Favoritos</span>

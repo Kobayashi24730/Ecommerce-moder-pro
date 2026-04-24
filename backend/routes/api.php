@@ -13,8 +13,13 @@ use App\Models\User;
 //    return User::all();
 //});
 
+Route::post('login', [UserController::class, 'login']);
 Route::apiResource('users', UserController::class);
 Route::prefix('recuperation')->group(function () {
     Route::post('users', [UserController::class, 'forgot_password']);
     Route::put('users', [UserController::class, 'reset_password']);
 });
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [UserController::class, 'logout']);
+});
+Route::get('me', [UserController::class, 'me']);

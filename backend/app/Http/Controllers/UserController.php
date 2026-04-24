@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -25,22 +28,22 @@ class UserController extends Controller
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|uiques:users',
-                'password' => 'required|min:8|confirmed'
+                'email' => 'required|email|unique:users',
+                'password' => 'required|min:8'
             ]);
             $users = User::create([
-                'name' => $request->nome,
+                'name' => $request->name,
                 'email' => $request->email,
-                'password' => $request->password
-            ], 200);
+                'password' => Hash::make($request->password)
+            ]);
             return response()->json([
                 'message' => 'Usuario cadastrado com sucesso!',
                 'data' => $users
-            ]);
+            ], 201);
         } catch (\Exception $ex) {
             return response()->json([
                 'message' => 'Falha ao cadastrar usuario!',
-                'data' => $ex
+                'data' => $ex->getMessage()
             ],404);
         }
     }
@@ -68,10 +71,10 @@ class UserController extends Controller
         try {
             $request->validate([
                 'nome' => 'required|string|max:255',
-                'email' => 'required|email|uiques:users',
+                'email' => 'required|email|unique:users',
                 'passwordNova' => 'required|min:8|confirmed'
             ]);
-            $user = User::crete([
+            $user = User::create([
                 'name' => $request->nome,
                 'email' => $request->email,
                 'password' => bcrypt($request->passwordNova)
@@ -141,23 +144,82 @@ class UserController extends Controller
                 'password' => 'required|min:8|confirmed'
             ]);
             $status = Password::reset(
-                $request->only('token', 'email', 'password_confirmed', 'token'),
+                $request->only('email', 'password', 'password_confirmation', 'token'),
                 function ($user, $password) use ($request) {
                     $user->forceFill([
                         'password' => $request->password
-                    ]);
+                    ])->setRememberToken(Str::random(50));
+                    $user->save();
                 }
             );
 
+            if($status == Password::PASSWORD_RESET){
+                return response()->json([
+                    'message' => 'Senha alterada com sucesso!',
+                    'data' => $status
+                ], 202);
+            }
             return response()->json([
-                'message' => 'Senha alterada com sucesso!',
+                'message' => 'Erro ao redefinir senha!',
                 'data' => $status
-            ]);
+            ], 400);
         } catch (\Exception $ex) {
             return response()->json([
                 'message' => 'Falha ao alterar senha!',
-                'data' => $ex
+                'data' => $ex->getMessage()
             ]);
         }
+    }
+
+    public function login(Request $request){
+        try {
+            $friends = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|min:8'
+            ]);
+
+            if(!Auth::attempt($friends)){
+                return response()->json([
+                    'message' => 'Email ou senha invalidos!'
+                ], 401);
+            }
+
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $user->tokens()->delete();
+            $token = $user->createToken('auth_token')->plainTextToken;
+            $cookie = cookie(
+                'jwt_token',
+                $token,
+                60 * 24,
+                "/",
+                null,
+                false,
+                true,
+                false,
+                'Lax'
+            );
+            return response()->json([ 'message' => 'Logado com sucesso!', 'token' => $token, 'user' => $user ])->withCookie($cookie);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([ 'errors' => $e->errors()], 422);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'message' => 'Falha ao logar!',
+                'data' => $ex->getMessage()
+            ], 500);
+        }
+    }
+
+    public function logout(Request $request){
+        $request->user()->currentAccessToken()?->delete();
+        return response()->json([ 'message' => 'Deslogado com sucesso!' ]);
+    }
+
+    public function me(){
+        $user = Auth::user();
+        if(!$user){
+            return response()->json([ 'message' => 'Usuario nao autenticado!' ]);
+        }
+        return response()->json(null);
     }
 }
