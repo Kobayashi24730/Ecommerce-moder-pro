@@ -218,8 +218,8 @@ class UserController extends Controller
     public function me(){
         $user = Auth::user();
         if(!$user){
-            return response()->json([ 'message' => 'Usuario nao autenticado!' ]);
+            return response()->json([ 'message' => 'Usuario nao autenticado!' ], 401);
         }
-        return response()->json(null);
+        return response()->json($user);
     }
 }

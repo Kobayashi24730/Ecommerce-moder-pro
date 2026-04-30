@@ -1,19 +1,19 @@
 import Auth from "@/pages/Auth";
 import { api } from "@/services/api";
 import React,{ useEffect, useState, useContext, createContext } from "react";
+import type { User, Notifications } from "@/types/types";
+import { Notificacoes } from '../components/ecommerce/ProfileComponents';
+import { useFetcher } from "react-router-dom";
 
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    password: string;
-}
 interface AuthContextData {
     user: any;
     isAuthenticated: boolean;
     loading: boolean;
     login: (credentials: any) => Promise<void>;
     logout: () => void;
+    loadNotifications: () => Promise<void>;
+    loadCoupons: () => Promise<void>;
+    loadCompras: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -21,19 +21,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<User | null>(() => {
         const user = localStorage.getItem('@App:user');
-        return user ? JSON.parse(user) : null;
+        if(!user || user == 'undefined' || user == 'null'){
+            return null;
+        }
+        try {
+            return JSON.parse(user);
+            console.log(user);
+        } catch (error) {
+            console.log("Sessao nao autenticada  catch", error);
+            return null;
+        }
     });
+
     useEffect(() => {
         async function loadStorageData() {
             try {
                 const response = await  api.get('/me');
+                const userData = response.data.user || response.data;
+                console.log("sessao nao autenticada no loadStorage",userData);
+                loadNotifications();
+                loadCoupons();
+                loadCompras();
                 if(response.data) {
                     setUser(response.data);
-                    localStorage.setItem('@App:user', JSON.stringify(response.data));
+                    localStorage.setItem('@App:user', JSON.stringify(userData));
                 }
             } catch (erro) {
-                setUser(null);
-                console.log("Sessao nao autenticada");
+                if(erro.response?.status == 401){
+                    setUser(null);
+                    console.log("Erro 401", erro);
+                    //console.log("Sessao nao autenticada 401, mas mantivemos o nome do usuario no cache", erro);
+                }
+                console.log("sessao nao autenticada no loadStorage",erro)
             } finally {
                 setLoading(false);
             }
@@ -42,10 +61,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const login = async (credentials: any) => {
+        await api.get('http://127.0.0.1:8000/sanctum/csrf-cookie');
         const response = await api.post('/login', credentials);
         const returnData = await response.data.user;
-        setUser(response.data.user);
-        localStorage.setItem('@App:user', JSON.stringify(returnData.name));
+        setUser(returnData);
+        localStorage.setItem('@App:user', JSON.stringify(returnData));
     };
 
     const logout = async () => {
@@ -54,13 +74,65 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem('@App:user');
     };
 
+    const loadCoupons = async () => {
+        if(!user) return;
+        try {
+            const response = await api.get('/user/coupons');
+            console.log('Cupons', response.data);
+            setUser((prevUser) => {
+                if(!prevUser) return;
+                return {
+                    ...prevUser,
+                    coupons: response.data
+                }
+            });
+        } catch(error) {
+            console.error("Erro ao carregar cupons", error);
+        }
+    }
+    const loadNotifications = async () => {
+        if(!user) return;
+        try {
+            const response = await api.get('/user/notifications');
+            console.log('Notificacoes', response.data);
+            setUser((prevUser) => {
+                if(!prevUser) return;
+                return {
+                    ...prevUser,
+                    notifications: response.data
+                }
+            });    
+        } catch (error) {
+            console.error("Erro ao carregar notificações", error);
+        }
+    };
+
+    const loadCompras = async () => {
+        if(!user) return;
+        try {
+            const response = await api.get('/user/orders');
+            console.log('Compras', response.data);
+            setUser((prevUser) => {
+                if(!prevUser) return;
+                return {
+                    ...prevUser,
+                    orders: response.data
+                };
+            });
+        } catch(error) {
+            console.error("Erro ao carregar compras", error);
+        }
+    };
     return (
         <AuthContext.Provider value={{
             user,
             isAuthenticated: !!user,
             loading,
             login,
-            logout
+            logout,
+            loadNotifications,
+            loadCoupons,
+            loadCompras
         }}>
             {children}
         </AuthContext.Provider>
