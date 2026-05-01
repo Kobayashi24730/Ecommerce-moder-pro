@@ -1,5 +1,5 @@
 import type { ProfileProps } from "@/types/types";
-import { User, Search, Package, MapPin, CreditCard, Calendar, Clock } from "lucide-react";
+import { User as UserIcon, Search, Package, MapPin, CreditCard, Calendar, Clock, Bell, Ticket, Phone, Fingerprint, Mail, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
 export const Conta = ({ data } : ProfileProps) => {
@@ -8,31 +8,119 @@ export const Conta = ({ data } : ProfileProps) => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
     );
+
     return(
-        <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
-            <div key={data.id}>
-                <h2 className="text-2xl font-bold mb-6 tracking-tight">Meu Perfil</h2>
+        <div className="space-y-6">
+            {/* Seção: Informações Pessoais */}
+            <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <UserIcon className="h-5 w-5 text-primary" />
+                    Informações Pessoais
+                </h2>
                 
-                <div className="space-y-4 max-w-md">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-muted-foreground">Nome do usuário</label>
+                        <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <UserIcon className="h-3.5 w-3.5" /> Nome Completo
+                        </label>
                         <input placeholder="Nome do usuário" defaultValue={data.name} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-muted-foreground">Email</label>
+                        <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <Mail className="h-3.5 w-3.5" /> Email
+                        </label>
                         <input placeholder="Email" defaultValue={data.email} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-muted-foreground">Número de telefone</label>
+                        <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <Phone className="h-3.5 w-3.5" /> Telefone
+                        </label>
                         <input placeholder="Número de telefone" defaultValue={data.phone} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all"/>
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-muted-foreground">CPF</label>
+                        <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <Fingerprint className="h-3.5 w-3.5" /> CPF
+                        </label>
                         <input placeholder="CPF" defaultValue={data.cpf} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
                     </div>
-                    <button type="submit" className="bg-primary text-primary-foreground hover:opacity-90 px-6 py-2.5 rounded-lg font-semibold transition-all mt-2">
-                        Gravar alterações
-                    </button>
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <Calendar className="h-3.5 w-3.5" /> Data de Nascimento
+                        </label>
+                        <input type="date" defaultValue={data.birthDate} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
+                    </div>
+                </div>
+                <button type="submit" className="bg-primary text-primary-foreground hover:opacity-90 px-6 py-2.5 rounded-lg font-semibold transition-all mt-8">
+                    Salvar Alterações
+                </button>
+            </div>
+
+            {/* Seção: Endereço Padrão */}
+            {data.addresses && data.addresses.length > 0 && (
+                <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                        <MapPin className="h-5 w-5 text-primary" />
+                        Endereço de Entrega
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {data.addresses.map((addr, index) => (
+                            <div key={index} className={`p-4 rounded-lg border ${addr.isDefault ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="font-bold text-sm">{addr.street}, {addr.number}</span>
+                                    {addr.isDefault && <span className="text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full">Padrão</span>}
+                                </div>
+                                <p className="text-xs text-muted-foreground">{addr.neighborhood}, {addr.city} - {addr.state}</p>
+                                <p className="text-xs text-muted-foreground">CEP: {addr.zipCode}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Seção: Segurança e Preferências */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
+                    <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                        <ShieldCheck className="h-5 w-5 text-primary" />
+                        Segurança
+                    </h2>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                            <div>
+                                <p className="text-sm font-medium">Autenticação em 2 Fatores</p>
+                                <p className="text-xs text-muted-foreground">{data.twoFactorEnabled ? 'Ativado' : 'Desativado'}</p>
+                            </div>
+                            <button className="text-xs font-bold text-primary hover:underline">Configurar</button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                            <div>
+                                <p className="text-sm font-medium">Senha</p>
+                                <p className="text-xs text-muted-foreground">Alterada há 3 meses</p>
+                            </div>
+                            <button className="text-xs font-bold text-primary hover:underline">Alterar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
+                    <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                        <Bell className="h-5 w-5 text-primary" />
+                        Preferências
+                    </h2>
+                    <div className="space-y-3">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" defaultChecked={data.preferences?.newsletter} className="h-4 w-4 rounded border-input text-primary focus:ring-primary" />
+                            <span className="text-sm group-hover:text-primary transition-colors">Receber Newsletter</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" defaultChecked={data.preferences?.emailNotifications} className="h-4 w-4 rounded border-input text-primary focus:ring-primary" />
+                            <span className="text-sm group-hover:text-primary transition-colors">Notificações por Email</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" defaultChecked={data.preferences?.smsNotifications} className="h-4 w-4 rounded border-input text-primary focus:ring-primary" />
+                            <span className="text-sm group-hover:text-primary transition-colors">Notificações por SMS</span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -90,7 +178,7 @@ export const Compras = ({ data }: ProfileProps) => {
                                             <Package className="h-5 w-5 text-primary" />
                                             <span className="font-semibold text-lg">Pedido #{c.id}</span>
                                             <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                c.status === 'Entregue' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                                                c.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
                                             }`}>
                                                 {c.status}
                                             </span>
@@ -111,7 +199,7 @@ export const Compras = ({ data }: ProfileProps) => {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Clock className="h-4 w-4" />
-                                                <span>Total: <strong className="text-foreground">{c.total}</strong></span>
+                                                <span>Total: <strong className="text-foreground">R$ {c.total}</strong></span>
                                             </div>
                                         </div>
                                     </div>
@@ -157,14 +245,15 @@ export const Notificacoes = ({data}: ProfileProps) => {
                         <div className="flex-grow">
                             <div className="flex justify-between items-start">
                                 <h2 className="font-bold text-foreground leading-tight">{n.title}</h2>
-                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{n.message}</span>
+                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{n.created_at}</span>
                             </div>
+                            <p className="text-sm text-muted-foreground mt-1">{n.message}</p>
                             <div className="mt-3 flex gap-3">
                                 <button className="text-xs font-semibold text-primary hover:underline transition-all">Marcar como lida</button>
                                 <button className="text-xs font-semibold text-destructive hover:underline transition-all">Excluir</button>
                             </div>
                         </div>
-                        <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>
+                        {!n.read && <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>}
                     </div>
                 ))
             ) : (
@@ -206,7 +295,7 @@ export const Coupons =  ({data}: ProfileProps) => {
                                         <code className="text-xs bg-muted px-1.5 py-0.5 rounded text-primary">{c.code}</code>
                                     </div>
                                 </td>
-                                <td className="p-4 text-sm text-muted-foreground">{c.min_value}</td>
+                                <td className="p-4 text-sm text-muted-foreground">Mínimo: R$ {c.min_value}</td>
                                 <td className="p-4">
                                     <span className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full font-medium">{c.tag}</span>
                                 </td>
@@ -224,7 +313,7 @@ export const Coupons =  ({data}: ProfileProps) => {
                     ) : (
                         <tr>
                             <td colSpan={5} className="p-12 text-center text-muted-foreground">
-                                <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                                <Ticket className="h-12 w-12 mx-auto mb-4 opacity-20" />
                                 Nenhum cupom encontrado
                             </td>
                         </tr>
