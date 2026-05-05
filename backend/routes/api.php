@@ -21,6 +21,7 @@ Route::prefix('recuperation')->group(function () {
     Route::put('users', [UserController::class, 'reset_password']);
 });
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('submit-profile', [UserController::class, 'submit_profile']);
     Route::post('logout', [UserController::class, 'logout']);
     Route::get('user/notifications', function (Request $request) {
         return response()->json($request->user()->notifications);
@@ -28,9 +29,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('user/coupons', function (Request $request) {
         return response()->json($request->user()->coupons);
     });
+    Route::put('user/orders', function (Request $request) {
+        try {
+            $validate = $request->validate([
+                'id' => 'required|integer',
+                'read' => 'required|boolean'
+            ]);
+            $order = \App\Models\Notification::where('id', $validate['id'])->where('user_id', request()->user()->id)->first();
+            if(!$order){
+                return response()->json(['message' => 'Pedido nao encontrado'], 404);
+            }
+            $order->read = $request->read;
+            $order->save();
+            return response()->json($order);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
+        }
+    });
     Route::get('/user/orders', function (Request $request) {
         try {
-            // Buscamos os pedidos filtrando pelo user_id do usuário logado
             $orders = \App\Models\Order::where('user_id', $request->user()->id)
                 ->with(['items']) // Carrega os itens
                 ->orderBy('created_at', 'desc')
@@ -38,7 +59,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
             return response()->json($orders);
         } catch (\Exception $e) {
-            // Isso vai mostrar o erro REAL no console do navegador (Network tab)
             return response()->json(['message' => $e->getMessage()], 500);
         }
     });

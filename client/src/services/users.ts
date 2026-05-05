@@ -1,5 +1,6 @@
-import type { TPGetUsers, TPAddUsers, TPEditUsers, TPDelUsers, TPConfitmUsers, TPForgetUser } from "../types/types";
+import type { TPGetUsers, TPAddUsers, TPEditUsers, TPDelUsers, TPConfitmUsers, TPForgetUser, User, TPNitifyUser } from "../types/types";
 import { API_URL } from "../api/connectAPI";
+import { api } from "./api";
 
 export async function getUser() {
     const response = await fetch(`${API_URL}/api/users`);
@@ -34,4 +35,19 @@ export async function forgotUser(user: TPForgetUser){
     }
     const data = await response.json();
     return data;
+}
+
+export async function submitProfile(user: User){
+    try {
+        const response = await api.post('/submit-profile', user);
+        return response.data;
+    } catch (error: any) {
+        console.error("Erro no update:", error.response?.data || error.message);
+        throw error;
+    }
+}
+
+export async function handleRead(user: TPNitifyUser){
+    const response = await api.put('/user/orders', user);
+    return response.data;
 }

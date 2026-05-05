@@ -222,4 +222,46 @@ class UserController extends Controller
         }
         return response()->json($user);
     }
+
+    public function submit_profile(Request $request){
+        try {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+
+            if(!$user){
+                return response()->json(['message' => 'Usuário não identificado'], 401);
+            }
+
+            $validate =$request->validate([
+                'name'  => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'birthDate'   => 'nullable|date',
+                'preferences' => 'nullable|array',
+                'phone'       => 'nullable|string',
+            ]);
+
+            $user->birthDate = $validate['birthDate'] ?: null;
+
+            $user->name = $validate['name'];
+            $user->birthDate = $validate['birthDate'];
+            $user->preferences = $validate['preferences'];
+            $user->phone = $validate['phone'];
+
+            if(!empty($validate['email'])){
+                $user->email = $validate['email'];
+            }
+            $user->save();
+
+            return response()->json([ 'message' => 'Perfil alterado com sucesso!' ], 200);
+        } catch(\Illuminate\Validation\ValidationException $e) {
+            return response()->json([ 'errors' => $e->errors()], 422);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'message' => 'Erro interno',
+                'debug' => $ex->getMessage(),
+                'line' => $ex->getLine(),
+                'file' => $ex->getFile()
+            ], 500);
+        }
+    }
 }

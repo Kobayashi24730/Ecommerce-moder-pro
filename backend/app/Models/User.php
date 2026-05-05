@@ -34,6 +34,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'preferences' => 'array',
+        'birthDate' => 'date',
         'two_factor_enabled' => 'boolean',
     ];
 

@@ -2,6 +2,11 @@ export type ProfileProps = {
     data: User | null;
 }
 
+export type TPNitifyUser = {
+    id: number;
+    read: boolean;
+}
+
 export type TPAddUsers = {
     name: string;
     email: string;
@@ -74,10 +79,11 @@ export type User = {
   name: string;
   email: string;
   password?: string;
-
   // 👤 Perfil
   phone?: string;
   cpf?: string;
+  createdAtFormatted?: string;
+  birthDateFormatted?: string;
   birthDate?: string;
   avatar?: string;
 

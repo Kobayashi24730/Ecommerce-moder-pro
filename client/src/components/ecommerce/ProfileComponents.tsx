@@ -1,13 +1,69 @@
-import type { ProfileProps } from "@/types/types";
+import type { ProfileProps, TPNitifyUser, User as userdata } from "@/types/types";
 import { User as UserIcon, Search, Package, MapPin, CreditCard, Calendar, Clock, Bell, Ticket, Phone, Fingerprint, Mail, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useInfosUser, useReadUser  } from "@/hooks";
 
 export const Conta = ({ data } : ProfileProps) => {
+    const [searchTerm, setSearchTerm] = useState("");
+    const { mutate: mutateInfos } = useInfosUser();
+    const [newData, setNewData] = useState<userdata>({
+        id: 0,
+        name: "",
+        email: "",
+        // 👤 Perfil
+        phone: "",
+        cpf: "",
+        birthDate: "",
+        avatar: "",
+        // 📍 Endereços
+        addresses: [],
+        // 🔔 Preferências
+        preferences: {
+            newsletter: false,
+            smsNotifications: false,
+            emailNotifications: false,
+        },
+        // 🔒 Segurança
+        emailVerifiedAt: "",
+        twoFactorEnabled: false,
+        // 🕒 Controle
+        createdAt: "",
+        updatedAt: "",
+    });
+
+    useEffect(() => {
+        setNewData(data);
+    }, [data]);
+
     if(!data) return (
         <div className="flex items-center justify-center p-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
     );
+
+    function onSubmitInfos(newData){
+        console.log(newData);
+        if(newData ==  null || !newData.name || !newData.email){
+            alert("Preencha todos os campos!");
+            return;
+        }
+        mutateInfos({
+                id: newData.id,
+                name: newData.name,
+                email: newData.email,
+                phone: newData.phone,
+                preferences: newData.preferences,
+                birthDate: newData.birthDate
+            },{
+                onSuccess: () => {
+                    alert("Informações alteradas com sucesso!");
+                    window.location.reload();d
+                },
+                onError: () => {
+                    alert("Não foi possível alterar as informações")
+                }
+        });
+    }
 
     return(
         <div className="space-y-6">
@@ -23,34 +79,34 @@ export const Conta = ({ data } : ProfileProps) => {
                         <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                             <UserIcon className="h-3.5 w-3.5" /> Nome Completo
                         </label>
-                        <input placeholder="Nome do usuário" defaultValue={data.name} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
+                        <input placeholder="Nome do usuário" defaultValue={data.name} onChange={(e) => setNewData({ ...newData, name: e.target.value })} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                             <Mail className="h-3.5 w-3.5" /> Email
                         </label>
-                        <input placeholder="Email" defaultValue={data.email} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
+                        <input placeholder="Email" defaultValue={data.email} onChange={(e) => setNewData({ ...newData, email: e.target.value })} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                             <Phone className="h-3.5 w-3.5" /> Telefone
                         </label>
-                        <input placeholder="Número de telefone" defaultValue={data.phone} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all"/>
+                        <input placeholder="Número de telefone" defaultValue={data.phone} onChange={(e) => setNewData({ ...newData, phone: e.target.value })} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all"/>
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                             <Fingerprint className="h-3.5 w-3.5" /> CPF
                         </label>
-                        <input placeholder="CPF" defaultValue={data.cpf} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
+                        <input placeholder="CPF" defaultValue={data.cpf} onChange={(e) => setNewData({ ...newData, cpf: e.target.value })} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                             <Calendar className="h-3.5 w-3.5" /> Data de Nascimento
                         </label>
-                        <input type="date" defaultValue={data.birthDate} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
+                        <input type="date" value={data?.birthDate  || ""} onChange={(e) => setNewData({ ...newData, birthDate: e.target.value })} className="w-full bg-background border border-input p-2.5 rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all" />
                     </div>
                 </div>
-                <button type="submit" className="bg-primary text-primary-foreground hover:opacity-90 px-6 py-2.5 rounded-lg font-semibold transition-all mt-8">
+                <button onClick={() => onSubmitInfos(newData)} type="submit" className="bg-primary text-primary-foreground hover:opacity-90 px-6 py-2.5 rounded-lg font-semibold transition-all mt-8">
                     Salvar Alterações
                 </button>
             </div>
@@ -63,8 +119,8 @@ export const Conta = ({ data } : ProfileProps) => {
                         Endereço de Entrega
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {data.addresses.map((addr, index) => (
-                            <div key={index} className={`p-4 rounded-lg border ${addr.isDefault ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                        {data.addresses.map((addr) => (
+                            <div key={addr.id} className={`p-4 rounded-lg border ${addr.isDefault ? 'border-primary bg-primary/5' : 'border-border'}`}>
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="font-bold text-sm">{addr.street}, {addr.number}</span>
                                     {addr.isDefault && <span className="text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full">Padrão</span>}
@@ -226,7 +282,26 @@ export const Compras = ({ data }: ProfileProps) => {
 };
 
 export const Notificacoes = ({data}: ProfileProps) => {
+    const { mutate: mutateRead } = useReadUser();
     const notificacoes = data?.notifications || [];
+    function markAsRead(id, status){
+        if(!data) {
+            alert('Erro ao marcar notificação como lida');
+            return;
+        }
+        mutateRead({
+            id: id,
+            read: !status
+        }, {
+            onSuccess: () => {
+                alert('Notificação marcada como lida');
+                window.location.reload();
+            },
+            onError: () => {
+                alert('Erro ao marcar notificação como lida');
+            }
+        });
+    }
     return(
         <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground mb-6 tracking-tight">Notificações</h1>
@@ -249,7 +324,7 @@ export const Notificacoes = ({data}: ProfileProps) => {
                             </div>
                             <p className="text-sm text-muted-foreground mt-1">{n.message}</p>
                             <div className="mt-3 flex gap-3">
-                                <button className="text-xs font-semibold text-primary hover:underline transition-all">Marcar como lida</button>
+                                <button type="submit" onClick={() => markAsRead(n.id, n.read)} className="text-xs font-semibold text-primary hover:underline transition-all">Marcar como lida</button>
                                 <button className="text-xs font-semibold text-destructive hover:underline transition-all">Excluir</button>
                             </div>
                         </div>
