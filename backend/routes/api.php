@@ -54,13 +54,13 @@ Route::middleware('auth:sanctum')->group(function () {
         try{
             $validate = $request->validate([
                 'id' => 'required|integer',
-                'status_id' => 'required|integer'
+                'status_id' => 'required|boolean'
             ]);
             $coupon = \App\Models\Coupon::where('id', $validate['id'])->first();
             if(!$coupon){
                 return response()->json(['message' => 'Cupom nao encontrado'], 404);
             }
-            $coupon->status_id = !$request->status_id;
+            $coupon->status_id = $request->status_id;
             $coupon->save();
             return response()->json($coupon);
         } catch (\Exception $e) {

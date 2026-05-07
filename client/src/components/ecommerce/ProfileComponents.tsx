@@ -353,7 +353,7 @@ export const Coupons =  ({data}: ProfileProps) => {
         }
         mutateStatus({
             id: id,
-            status_id: status,
+            status_id: !status,
             email: data?.email,
             name: data?.name
         }, {
@@ -389,7 +389,7 @@ export const Coupons =  ({data}: ProfileProps) => {
                                 <td className="p-4 flex items-center gap-3">
                                     {c.image && <img src={c.image} alt="icon" className="h-10 w-10 rounded border border-border" />}
                                     <div>
-                                        <p className="font-bold text-foreground">{c.tag}</p>
+                                        <p className="font-bold text-foreground">{Number(c.status_id) == 1 ? 'Usado' : 'Disponível'}</p>
                                         <code className="text-xs bg-muted px-1.5 py-0.5 rounded text-primary">{c.code}</code>
                                     </div>
                                 </td>
@@ -402,8 +402,8 @@ export const Coupons =  ({data}: ProfileProps) => {
                                     <p className="font-medium text-destructive">Expira: {c.expiry_date}</p>
                                 </td>
                                 <td className="p-4 text-right">
-                                    <button onClick={() => markAsUsed(c.id, c.status_id)} className="bg-primary text-primary-foreground hover:opacity-90 px-4 py-1.5 rounded-lg font-medium transition-all text-sm">
-                                        Aplicar
+                                    <button onClick={() => markAsUsed(c.id, {status: Number(c.status_id) == 1 ? 0 : 1})} className="bg-primary text-primary-foreground hover:opacity-90 px-4 py-1.5 rounded-lg font-medium transition-all text-sm">
+                                        {Number(c.status_id) == 1 ? 'Desmarcar' : 'Aplicar'}
                                     </button>
                                 </td>
                             </tr>
