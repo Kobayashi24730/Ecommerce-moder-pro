@@ -2,6 +2,13 @@ export type ProfileProps = {
     data: User | null;
 }
 
+export type TPcouponStatusUser = {
+    id: number;
+    status_id: boolean;
+    email: string;
+    name: string;
+}
+
 export type TPNitifyUser = {
     id: number;
     read: boolean;
@@ -143,6 +150,7 @@ export type Coupon = {
   start_date: string;
   expiry_date: string;
   image?: string;
+  status_id: boolean;
 }
 //Pedido
 export type Order =  {

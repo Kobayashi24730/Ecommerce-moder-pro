@@ -1,7 +1,8 @@
 import type { ProfileProps, TPNitifyUser, User as userdata } from "@/types/types";
 import { User as UserIcon, Search, Package, MapPin, CreditCard, Calendar, Clock, Bell, Ticket, Phone, Fingerprint, Mail, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useInfosUser, useReadUser  } from "@/hooks";
+import { useInfosUser, useReadUser, useStatusUser  } from "@/hooks";
+import { handleStatusCoupon } from "@/services/users";
 
 export const Conta = ({ data } : ProfileProps) => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -343,6 +344,28 @@ export const Notificacoes = ({data}: ProfileProps) => {
 
 export const Coupons =  ({data}: ProfileProps) => {
     const coupons = data?.coupons || [];
+    const { mutate: mutateStatus } = useStatusUser();
+
+    function markAsUsed(id, status){
+        if(!id || !status) {
+            console.log('Erro ao marcar cupom como usado');
+            return;
+        }
+        mutateStatus({
+            id: id,
+            status_id: status,
+            email: data?.email,
+            name: data?.name
+        }, {
+            onSuccess: () => {
+                alert('Cupom marcado como usado');
+                window.location.reload();
+            },
+            onError: () => {
+                alert('Erro ao marcar cupom como usado');
+            }
+        });
+    }
     return (
     <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
         <div className="p-6 border-b border-border bg-muted/30">
@@ -379,7 +402,7 @@ export const Coupons =  ({data}: ProfileProps) => {
                                     <p className="font-medium text-destructive">Expira: {c.expiry_date}</p>
                                 </td>
                                 <td className="p-4 text-right">
-                                    <button className="bg-primary text-primary-foreground hover:opacity-90 px-4 py-1.5 rounded-lg font-medium transition-all text-sm">
+                                    <button onClick={() => markAsUsed(c.id, c.status_id)} className="bg-primary text-primary-foreground hover:opacity-90 px-4 py-1.5 rounded-lg font-medium transition-all text-sm">
                                         Aplicar
                                     </button>
                                 </td>

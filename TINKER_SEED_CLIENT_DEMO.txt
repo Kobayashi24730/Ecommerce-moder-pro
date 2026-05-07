@@ -1,0 +1,193 @@
+// Arquivo: TINKER_SEED_CLIENT_DEMO.txt
+// Como usar:
+// 1) Abra um terminal na pasta do projeto (onde existe o artisan).
+// 2) Execute: php artisan tinker
+// 3) Cole o conteúdo abaixo no Tinker (CTRL+V).
+
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Models\Coupon;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Notification;
+
+$email = 'ajente00g@gmail.com';
+$passwordPlain = '12345678';
+
+// 1) Cria o usuário (se não existir)
+$user = User::where('email', $email)->first();
+if (!$user) {
+    $user = User::create([
+        'name' => 'Client Ajente',
+        'email' => $email,
+        'password' => Hash::make($passwordPlain),
+        // Campos opcionais: se você tiver migrações/colunas diferentes, ajuste.
+        'phone' => null,
+        'cpf' => null,
+        'birth_date' => null,
+        'date_of_user' => now()->format('Y-m-d'),
+    ]);
+}
+
+// 2) Garante que existam cupons para anexar (se nenhum cupom existir, cria alguns)
+$coupons = Coupon::all();
+if ($coupons->count() < 2) {
+    Coupon::insert([
+        [
+            'code' => 'AJENTE10',
+            'description' => 'Cupom demo 10%',
+            'min_value' => 50,
+            'tag' => 'percentage',
+            'start_date' => now()->toDateString(),
+            'expiry_date' => now()->addMonths(6)->toDateString(),
+            'image' => null,
+            'status_id' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+        [
+            'code' => 'FRETEGRATIS',
+            'description' => 'Frete grátis (demo)',
+            'min_value' => 0,
+            'tag' => 'free_shipping',
+            'start_date' => now()->toDateString(),
+            'expiry_date' => now()->addMonths(6)->toDateString(),
+            'image' => null,
+            'status_id' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+    ]);
+}
+
+$coupons = Coupon::all();
+$selectedCoupons = $coupons->take(2);
+
+// 3) Anexa cupons ao usuário (pivot coupon_user)
+// Relacionamento em App\\Models\\User: coupons() belongsToMany(Coupon::class)
+$selectedCoupons->each(function($coupon) use ($user) {
+    // Evita duplicar attach
+    if (!$user->coupons()->where('coupons.id', $coupon->id)->exists()) {
+        $user->coupons()->attach($coupon->id);
+    }
+});
+
+// 4) Cria pedidos e itens (orders / order_items)
+// Se você quiser sempre recriar, remova os blocos de checagem.
+$existingOrdersCount = Order::where('user_id', $user->id)->count();
+if ($existingOrdersCount < 1) {
+    $order1 = Order::create([
+        'user_id' => $user->id,
+        'total' => 299.90,
+        'status' => 'paid',
+        'address_snapshot' => [
+            'street' => 'Rua Demo',
+            'number' => '123',
+            'complement' => 'Apto 1',
+            'neighborhood' => 'Centro',
+            'city' => 'São Paulo',
+            'state' => 'SP',
+            'zipCode' => '01000-000',
+            'country' => 'Brasil',
+            'isDefault' => true,
+        ],
+        'payment_method_snapshot' => [
+            'method' => 'credit_card',
+            'provider' => 'demo',
+            'last4' => '4242',
+        ],
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order1->id,
+        'product_id' => 1001,
+        'name' => 'Produto Demo 1',
+        'price' => 99.90,
+        'quantity' => 2,
+        'image' => null,
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order1->id,
+        'product_id' => 1002,
+        'name' => 'Produto Demo 2',
+        'price' => 100.00,
+        'quantity' => 1,
+        'image' => null,
+    ]);
+
+    $order2 = Order::create([
+        'user_id' => $user->id,
+        'total' => 149.50,
+        'status' => 'processing',
+        'address_snapshot' => [
+            'street' => 'Av. Teste',
+            'number' => '55',
+            'complement' => null,
+            'neighborhood' => 'Bairro X',
+            'city' => 'Rio de Janeiro',
+            'state' => 'RJ',
+            'zipCode' => '20000-000',
+            'country' => 'Brasil',
+            'isDefault' => false,
+        ],
+        'payment_method_snapshot' => [
+            'method' => 'pix',
+            'provider' => 'demo',
+            'reference' => 'PIX-DEMO',
+        ],
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order2->id,
+        'product_id' => 2001,
+        'name' => 'Produto Demo 3',
+        'price' => 49.50,
+        'quantity' => 3,
+        'image' => null,
+    ]);
+}
+
+// 5) Cria notificações
+$existingNotifCount = Notification::where('user_id', $user->id)->count();
+if ($existingNotifCount < 1) {
+    Notification::insert([
+        [
+            'user_id' => $user->id,
+            'title' => 'Bem-vindo!',
+            'message' => 'Conta demo criada via Tinker.',
+            'read' => false,
+            'image' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+        [
+            'user_id' => $user->id,
+            'title' => 'Cupom aplicado',
+            'message' => 'Seu cupom demo foi associado à sua conta.',
+            'read' => true,
+            'image' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+    ]);
+}
+
+// 6) (Opcional) Gere token Sanctum para chamadas das rotas auth:sanctum
+// Isso vai criar um token e retornar seu plain text token.
+$token = $user->tokens()->delete(); // limpa tokens existentes
+$token = $user->createToken('client_demo')->plainTextToken;
+
+$user->load(['coupons', 'orders', 'notifications']);
+
+return [
+    'user' => [
+        'id' => $user->id,
+        'email' => $user->email,
+        'has_coupons' => $user->coupons->count(),
+        'orders_count' => $user->orders->count(),
+        'notifications_count' => $user->notifications->count(),
+    ],
+    'sanctum_token' => $token,
+];
+

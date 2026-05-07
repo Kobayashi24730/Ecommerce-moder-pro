@@ -29,19 +29,40 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('user/coupons', function (Request $request) {
         return response()->json($request->user()->coupons);
     });
-    Route::put('user/orders', function (Request $request) {
+    Route::put('user/notification', function (Request $request) {
         try {
             $validate = $request->validate([
                 'id' => 'required|integer',
                 'read' => 'required|boolean'
             ]);
-            $order = \App\Models\Notification::where('id', $validate['id'])->where('user_id', request()->user()->id)->first();
-            if(!$order){
+            $notification = \App\Models\Notification::where('id', $validate['id'])->where('user_id', request()->user()->id)->first();
+            if(!$notification){
                 return response()->json(['message' => 'Pedido nao encontrado'], 404);
             }
-            $order->read = $request->read;
-            $order->save();
-            return response()->json($order);
+            $notification->read = $request->read;
+            $notification->save();
+            return response()->json($notification);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
+        }
+    });
+    Route::put('user/coupons', function (Request $request) {
+        try{
+            $validate = $request->validate([
+                'id' => 'required|integer',
+                'status_id' => 'required|integer'
+            ]);
+            $coupon = \App\Models\Coupon::where('id', $validate['id'])->first();
+            if(!$coupon){
+                return response()->json(['message' => 'Cupom nao encontrado'], 404);
+            }
+            $coupon->status_id = !$request->status_id;
+            $coupon->save();
+            return response()->json($coupon);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage(),

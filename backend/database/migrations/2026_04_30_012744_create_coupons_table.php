@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('tag');
             $table->timestamp('start_date');
             $table->timestamp('expiry_date');
+            $table->string('status_id')->default(0);
             $table->string('image')->nullable();
             $table->timestamps();
         });

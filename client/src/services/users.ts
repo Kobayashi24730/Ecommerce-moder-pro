@@ -1,4 +1,4 @@
-import type { TPGetUsers, TPAddUsers, TPEditUsers, TPDelUsers, TPConfitmUsers, TPForgetUser, User, TPNitifyUser } from "../types/types";
+import type { TPGetUsers, TPAddUsers, TPEditUsers, TPDelUsers, TPConfitmUsers, TPForgetUser, User, TPNitifyUser, TPcouponStatusUser } from "../types/types";
 import { API_URL } from "../api/connectAPI";
 import { api } from "./api";
 
@@ -48,6 +48,11 @@ export async function submitProfile(user: User){
 }
 
 export async function handleRead(user: TPNitifyUser){
-    const response = await api.put('/user/orders', user);
+    const response = await api.put('/user/notification', user);
+    return response.data;
+}
+
+export async function handleStatusCoupon(user: TPcouponStatusUser){
+    const response = await api.put('/user/coupons', user);
     return response.data;
 }
