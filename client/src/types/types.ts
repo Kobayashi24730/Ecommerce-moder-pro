@@ -4,7 +4,7 @@ export type ProfileProps = {
 
 export type TPcouponStatusUser = {
     id: number;
-    status_id: boolean;
+    status_id: number;
     email: string;
     name: string;
 }

@@ -27,7 +27,19 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json($request->user()->notifications);
     });
     Route::get('user/coupons', function (Request $request) {
-        return response()->json($request->user()->coupons);
+        try {
+            $user = \App\Models\User::with(['coupons' => function($query) {
+                $query->whereDate('expiry_date', '>=', now()->toDateString());
+            }])->find($request->user()->id);
+
+            return response()->json($user->coupons);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     });
     Route::put('user/notification', function (Request $request) {
         try {

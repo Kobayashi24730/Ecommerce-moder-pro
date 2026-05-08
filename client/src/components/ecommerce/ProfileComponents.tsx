@@ -345,15 +345,20 @@ export const Notificacoes = ({data}: ProfileProps) => {
 export const Coupons =  ({data}: ProfileProps) => {
     const coupons = data?.coupons || [];
     const { mutate: mutateStatus } = useStatusUser();
+    const validateCoupons = coupons.filter((e) => {
+        const expired_date = new Date(e.expiry_date);
+        const current_date = new Date();
+        return expired_date > current_date;
+    });
 
     function markAsUsed(id, status){
-        if(!id || !status) {
-            console.log('Erro ao marcar cupom como usado');
-            return;
+        if(!id){
+            return console.error('ID do cupom é necessário para marcar como usado');
         }
+        const curentStatus = Number(status) === 1 ? 0 : 1;
         mutateStatus({
             id: id,
-            status_id: !status,
+            status_id: curentStatus,
             email: data?.email,
             name: data?.name
         }, {
@@ -384,7 +389,7 @@ export const Coupons =  ({data}: ProfileProps) => {
                 </thead>
                 <tbody>
                     {coupons.length > 0 ? (
-                        coupons.map((c) => (
+                        validateCoupons.map((c) => (
                             <tr key={c.id} className="border-b border-border hover:bg-muted/10 transition-colors">
                                 <td className="p-4 flex items-center gap-3">
                                     {c.image && <img src={c.image} alt="icon" className="h-10 w-10 rounded border border-border" />}
@@ -402,7 +407,7 @@ export const Coupons =  ({data}: ProfileProps) => {
                                     <p className="font-medium text-destructive">Expira: {c.expiry_date}</p>
                                 </td>
                                 <td className="p-4 text-right">
-                                    <button onClick={() => markAsUsed(c.id, {status: Number(c.status_id) == 1 ? 0 : 1})} className="bg-primary text-primary-foreground hover:opacity-90 px-4 py-1.5 rounded-lg font-medium transition-all text-sm">
+                                    <button onClick={() => markAsUsed(c.id, c.status_id)} className="bg-primary text-primary-foreground hover:opacity-90 px-4 py-1.5 rounded-lg font-medium transition-all text-sm">
                                         {Number(c.status_id) == 1 ? 'Desmarcar' : 'Aplicar'}
                                     </button>
                                 </td>
