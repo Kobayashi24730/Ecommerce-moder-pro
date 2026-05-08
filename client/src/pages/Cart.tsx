@@ -4,13 +4,16 @@ import Header from "@/components/ecommerce/Header";
 import Footer from "@/components/ecommerce/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
-
+import ListCouponsMark from "@/components/ecommerce/listCouponsMark";
+import { useState } from "react";
 const formatPrice = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const Cart = () => {
   const navigate = useNavigate();
   const { items, updateQuantity, removeFromCart, totalPrice, totalItems, clearCart } = useCart();
+  const coupon_usado = null;
+  const [showOpenList, setShowOpenList] = useState(null);
 
   if (items.length === 0) {
     return (
@@ -102,6 +105,40 @@ const Cart = () => {
                         <Plus className="h-3 w-3" />
                       </button>
                     </div>
+                    <p className="text-xs text-muted-foreground hover:text-accent transition-colors">
+                      { coupon_usado == null ? (
+                        <div>
+                          Aplique um cupon: <button onClick={() => setShowOpenList(true)} className="text-success font-semibold">lista de cupons</button>
+                        </div>
+                      ) : (
+                        <div>
+                          Coupon aplicado: <span className="text-success font-semibold">{coupon_usado}</span>
+                        </div>
+                      )}
+                    </p>
+                    {showOpenList && (
+                      <>
+                        <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowOpenList(false)}/>
+
+                        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card border border-border rounded-xl p-6 w-[90%] max-w-md z-50 shadow-2xl">
+                          <button 
+                            onClick={() => setShowOpenList(false)} 
+                            className="absolute top-4 right-4 text-muted-foreground hover:text-accent transition-colors text-lg"
+                          >
+                            ✕
+                          </button>
+
+                          <div className="mb-4">
+                            <h3 className="text-lg font-bold">Selecione um Cupom</h3>
+                            <p className="text-sm text-muted-foreground">Escolha um dos seus cupons disponíveis</p>
+                          </div>
+
+                          <div className="max-h-[60vh] overflow-y-auto">
+                            <ListCouponsMark />
+                          </div>
+                        </div>
+                      </>
+                    )}
                     <button
                       onClick={() => removeFromCart(product.id)}
                       className="p-1.5 text-muted-foreground hover:text-accent transition-colors"

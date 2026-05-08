@@ -15,7 +15,6 @@ export default function Profile() {
         }
     }, []);
 
-    // Mock de dados para garantir que os componentes tenham o que exibir
     const userData = user ? {
         ...user,
         orders: user.orders || [
