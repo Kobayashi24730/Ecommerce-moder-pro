@@ -1,15 +1,19 @@
 import { Star, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import type { Product } from "@/data/mockProducts";
+import { useGetProducts } from "@/hooks";
 
-interface ProductCardProps {
-  product: Product;
-}
 
 const formatPrice = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-const ProductCard = ({ product }: ProductCardProps) => {
+
+const ProductCard = () => {
+  const { data: products, isLoading, error } = useGetProducts();
+  if (products) {
+    console.log('data: ',products);
+  }
+
+  const product = products ? products[0] : null;
   const navigate = useNavigate();
 
   return (
@@ -19,14 +23,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
     >
       {/* Image */}
       <div className="relative aspect-square bg-card overflow-hidden">
-        {product.discount && (
+        {product.base_price && (
           <span className="absolute top-2 left-2 bg-accent text-accent-foreground text-[11px] font-bold px-2 py-0.5 rounded-sm z-10">
-            {product.discount}% OFF
+            {product?.base_price}% OFF
           </span>
         )}
         <img
           src={product.image}
-          alt={product.title}
+          alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
@@ -35,30 +39,30 @@ const ProductCard = ({ product }: ProductCardProps) => {
       {/* Info */}
       <div className="p-3 flex flex-col flex-1 gap-1.5">
         <h3 className="text-sm text-foreground line-clamp-2 leading-snug min-h-[2.5rem]">
-          {product.title}
+          {product.name}
         </h3>
 
         {/* Price */}
         <div className="mt-auto">
-          {product.originalPrice && (
+          {product.base_price && (
             <span className="text-xs text-price-old line-through">
-              {formatPrice(product.originalPrice)}
+              {formatPrice(product.stock)}
             </span>
           )}
           <div className="flex items-baseline gap-1">
             <span className="text-xl font-bold text-price">
-              {formatPrice(product.price)}
+              {formatPrice(product.stock)}
             </span>
           </div>
-          {product.installments && (
+          {product.description && (
             <p className="text-xs text-muted-foreground">
-              em até <span className="font-semibold text-foreground">{product.installments}x</span> sem juros
+              em até <span className="font-semibold text-foreground">{product.description}x</span> sem juros
             </p>
           )}
         </div>
 
         {/* Shipping */}
-        {product.freeShipping && (
+        {product.company_id && (
           <div className="flex items-center gap-1 mt-1">
             <Truck className="h-3.5 w-3.5 text-success" />
             <span className="text-xs font-semibold text-success">Frete grátis</span>
@@ -72,7 +76,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               <Star
                 key={i}
                 className={`h-3 w-3 ${
-                  i < Math.floor(product.rating)
+                  i < Math.floor(product.stock)
                     ? "fill-star text-star"
                     : "fill-muted text-muted"
                 }`}
@@ -80,7 +84,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             ))}
           </div>
           <span className="text-[11px] text-muted-foreground">
-            ({product.reviews.toLocaleString()})
+            ({product.stock.toLocaleString()})
           </span>
         </div>
       </div>

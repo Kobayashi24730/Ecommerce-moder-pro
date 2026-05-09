@@ -14,6 +14,7 @@ use App\Models\Address;
 use App\Models\Order;
 use App\Models\Notification;
 use App\Models\Coupon;
+use App\models\Cart;
 
 class User extends Authenticatable
 {
@@ -61,5 +62,9 @@ class User extends Authenticatable
 
     public function coupons() {
         return $this->belongsToMany(Coupon::class); // Geralmente cupons são N para N
+    }
+
+    public function cart() {
+        return $this->hasOne(Cart::class);
     }
 }

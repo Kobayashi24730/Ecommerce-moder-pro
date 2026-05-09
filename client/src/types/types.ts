@@ -1,5 +1,48 @@
+import { typeboxResolver } from "@hookform/resolvers/typebox/src/typebox.js";
+
 export type ProfileProps = {
     data: User | null;
+}
+
+export interface TPProductAttribute {
+  id: number;
+  product_id: number;
+  name: string;
+  value: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface TPCompany {
+  id: number;
+  name: string;
+  logo?: string;
+  slug: string;
+}
+
+export interface TPCategory {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface TPProduct {
+  id: number;
+  company_id: number;
+  category_id: number;
+  name: string;
+  description: string;
+  base_price: string | number; // O Laravel envia decimal como string no JSON
+  stock: number;
+  image?: string;
+  
+  // Relacionamentos (Eager Loading)
+  attributes?: TPProductAttribute[];
+  company?: TPCompany;
+  category?: TPCategory;
+  
+  created_at: string;
+  updated_at: string;
 }
 
 export type TPcouponStatusUser = {

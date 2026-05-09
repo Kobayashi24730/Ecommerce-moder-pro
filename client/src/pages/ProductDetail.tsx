@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Star, Truck, ShieldCheck, ChevronLeft, Minus, Plus, ShoppingCart } from "lucide-react";
 import Header from "@/components/ecommerce/Header";
 import Footer from "@/components/ecommerce/Footer";
-import { products } from "@/data/mockProducts";
+import { useGetProducts } from "@/hooks";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 
@@ -11,21 +11,22 @@ const formatPrice = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const ProductDetail = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const product = products.find((p) => p.id === id);
+  const { data: products } = useGetProducts();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const { id } = useParams<{ id: string }>();
+  const product = products?.find((p) => p.id === Number(id));
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <p className="text-lg text-muted-foreground">Produto não encontrado</p>
-          <Button variant="outline" className="mt-4" onClick={() => navigate("/")}>
-            Voltar ao início
+     <div className="min-h-screen bg-background">
+      <Header />
+      <div className="container mx-auto px-4 py-20 text-center">
+        <p className="text-lg text-muted-foreground">Produto não encontrado</p>
+        <Button variant="outline" className="mt-4" onClick={() => navigate("/")}>
+          Voltar ao início
           </Button>
         </div>
         <Footer />
@@ -33,7 +34,7 @@ const ProductDetail = () => {
     );
   }
 
-  const allImages = product.images?.length ? product.images : [product.image];
+  const allImages = product.image?.length ? product.image : [product.image];
 
   const handleBuyNow = () => {
     addToCart(product, quantity);
@@ -62,40 +63,23 @@ const ProductDetail = () => {
             {/* Image Gallery */}
             <div className="p-4 md:p-6">
               <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-3">
-                {product.discount && (
+                {product.name && (
                   <span className="absolute top-3 left-3 bg-accent text-accent-foreground text-xs font-bold px-2.5 py-1 rounded-sm z-10">
-                    {product.discount}% OFF
+                    {product.name}% OFF
                   </span>
                 )}
                 <img
                   src={allImages[selectedImage]}
-                  alt={product.title}
+                  alt={product.name}
                   className="w-full h-full object-cover"
                 />
               </div>
-              {allImages.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto">
-                  {allImages.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedImage(i)}
-                      className={`flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-colors ${
-                        selectedImage === i
-                          ? "border-primary"
-                          : "border-border hover:border-muted-foreground"
-                      }`}
-                    >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Product Info */}
             <div className="p-4 md:p-6 flex flex-col">
               <h1 className="text-lg md:text-xl font-bold text-foreground leading-tight">
-                {product.title}
+                {product.name}
               </h1>
 
               {/* Rating */}
@@ -105,7 +89,7 @@ const ProductDetail = () => {
                     <Star
                       key={i}
                       className={`h-4 w-4 ${
-                        i < Math.floor(product.rating)
+                        i < Math.floor(product.stock)
                           ? "fill-star text-star"
                           : "fill-muted text-muted"
                       }`}
@@ -113,32 +97,32 @@ const ProductDetail = () => {
                   ))}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {product.rating} ({product.reviews.toLocaleString()} avaliações)
+                  {product.stock} ({product.stock.toLocaleString()} avaliações)
                 </span>
               </div>
 
               {/* Price */}
               <div className="mt-4 p-4 bg-background rounded-lg">
-                {product.originalPrice && (
+                {product.base_price && (
                   <span className="text-sm text-price-old line-through">
-                    {formatPrice(product.originalPrice)}
+                    {formatPrice(product.stock)}
                   </span>
                 )}
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-extrabold text-price">
-                    {formatPrice(product.price)}
+                    {formatPrice(product.stock || product.stock)}
                   </span>
-                  {product.discount && (
+                  {product.base_price && (
                     <span className="text-sm font-bold text-accent">
-                      {product.discount}% OFF
+                      {product.base_price}% OFF
                     </span>
                   )}
                 </div>
-                {product.installments && (
+                {product.name && (
                   <p className="text-sm text-muted-foreground mt-1">
                     em até{" "}
                     <span className="font-semibold text-foreground">
-                      {product.installments}x de {formatPrice(product.price / product.installments)}
+                      {product.name}x de {formatPrice(product.stock / product.stock)}
                     </span>{" "}
                     sem juros
                   </p>
@@ -146,7 +130,7 @@ const ProductDetail = () => {
               </div>
 
               {/* Shipping */}
-              {product.freeShipping && (
+              {product.base_price && (
                 <div className="flex items-center gap-2 mt-3 p-3 bg-success/10 rounded-lg">
                   <Truck className="h-5 w-5 text-success" />
                   <div>

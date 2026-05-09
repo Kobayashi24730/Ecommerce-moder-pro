@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CartControllers;
+use App\Http\Controllers\ProductControllers;
 use App\Models\User;
 use App\Models\Order;
 
@@ -20,7 +22,9 @@ Route::prefix('recuperation')->group(function () {
     Route::post('users', [UserController::class, 'forgot_password']);
     Route::put('users', [UserController::class, 'reset_password']);
 });
+Route::apiResource('products', ProductControllers::class);
 Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('cart', CartControllers::class);
     Route::post('submit-profile', [UserController::class, 'submit_profile']);
     Route::post('logout', [UserController::class, 'logout']);
     Route::get('user/notifications', function (Request $request) {
@@ -86,7 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/orders', function (Request $request) {
         try {
             $orders = \App\Models\Order::where('user_id', $request->user()->id)
-                ->with(['items']) // Carrega os itens
+                ->with(['items'])
                 ->orderBy('created_at', 'desc')
                 ->get();
 

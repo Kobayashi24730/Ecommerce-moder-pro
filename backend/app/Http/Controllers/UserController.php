@@ -223,6 +223,23 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    public function get_order_cart(Request $request){
+        try {
+            $validate = $request->validate([
+                'user_id' => 'required|integer',
+                'total' => 'required|numeric',
+            ]);
+            $orders = \App\Models\User::find('user_id', $validate['user_id'])->with(['items'])->orderBy('created_at', 'desc')->get();
+            return response()->json($orders);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'message' => 'Falha ao obter carrinho!',
+                'debug' => $ex->getMessage(),
+                'line' => $ex->getLine(),
+                'file' => $ex->getFile()
+            ]);
+        }
+    }
     public function submit_profile(Request $request){
         try {
             /** @var \App\Models\User $user */
