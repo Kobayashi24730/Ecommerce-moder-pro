@@ -15,7 +15,7 @@ export const products: TPProduct[] = [
     category_id: 10,
     name: "Smartphone Galaxy S24 Ultra 256GB 5G Tela 6.8\"",
     description: "O Galaxy S24 Ultra é o smartphone mais avançado da Samsung, com câmera de 200MP e IA integrada.",
-    base_price: 4299.00,
+    base_price: "4299.00",
     stock: 15,
     image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop",
     attributes: [
@@ -31,7 +31,7 @@ export const products: TPProduct[] = [
     category_id: 1,
     name: "Notebook Gamer i7 16GB RAM RTX 4060",
     description: "Potência extrema para jogos e trabalho pesado com RTX 4060.",
-    base_price: 5499.00,
+    base_price: "5499.00",
     stock: 8,
     image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop",
     attributes: [
@@ -47,7 +47,7 @@ export const products: TPProduct[] = [
     category_id: 2,
     name: "Tênis Nike Air Max 90 Masculino",
     description: "Estilo retrô com conforto moderno e amortecimento Air Max.",
-    base_price: 449.90,
+    base_price: "449.90",
     stock: 50,
     image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
     attributes: [
@@ -63,7 +63,7 @@ export const products: TPProduct[] = [
     category_id: 10,
     name: "Fone de Ouvido Bluetooth Over-Ear ANC",
     description: "Cancelamento ativo de ruído e bateria de 30 horas.",
-    base_price: 299.90,
+    base_price: "299.90",
     stock: 30,
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
     attributes: [],
