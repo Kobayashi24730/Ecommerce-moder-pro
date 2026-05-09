@@ -82,5 +82,3 @@ export function searchProducts(query: string): TPProduct[] {
     p.description.toLowerCase().includes(q)
   );
 }
-
-export const flashDeals: TPProduct[] = products.filter(p => Number(p.base_price) > 1000);

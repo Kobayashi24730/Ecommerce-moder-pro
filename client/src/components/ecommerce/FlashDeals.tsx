@@ -1,8 +1,15 @@
 import { Zap, ChevronRight } from "lucide-react";
 import ProductCard from "./ProductCard";
-import { flashDeals } from "@/data/mockProducts";
+import type { TPProduct } from "@/types/types";
+import { useGetProducts } from "@/hooks";
 
 const FlashDeals = () => {
+  const { data: products, isLoading } = useGetProducts();
+  const deals = products ? products.filter(p => Number(p?.base_price) > 1000) : [];
+
+  if(isLoading && deals.length ===  0){
+    <div className="container mx-auto px-4 py-6">Carregando...</div>
+  }
   return (
     <section className="py-6">
       <div className="container mx-auto px-4">
@@ -22,7 +29,7 @@ const FlashDeals = () => {
           </a>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {flashDeals.map((product) => (
+          {deals.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

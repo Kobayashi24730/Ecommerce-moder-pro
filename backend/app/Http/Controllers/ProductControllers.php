@@ -15,7 +15,9 @@ class ProductControllers extends Controller
     public function index(Request $request){
         try {
             $products = Product::with(['attributes', 'company'])->orderBy('created_at', 'desc')->get();
-            return response()->json($products);
+            return response()->json([
+                'data' => $products
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage(),

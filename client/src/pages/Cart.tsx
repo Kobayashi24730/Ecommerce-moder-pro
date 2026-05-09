@@ -68,7 +68,7 @@ const Cart = () => {
               >
                 <img
                   src={product.image}
-                  alt={product.title}
+                  alt={product.name}
                   className="w-24 h-24 object-cover rounded-md flex-shrink-0 cursor-pointer"
                   onClick={() => navigate(`/product/${product.id}`)}
                 />
@@ -77,29 +77,29 @@ const Cart = () => {
                     className="text-sm font-medium text-foreground line-clamp-2 cursor-pointer hover:text-primary transition-colors"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
-                    {product.title}
+                    {product.name}
                   </h3>
                   <div className="mt-1">
-                    {product.originalPrice && (
+                    {product.base_price && (
                       <span className="text-xs text-price-old line-through mr-2">
-                        {formatPrice(product.originalPrice)}
+                        {formatPrice(Number(product.base_price))}
                       </span>
                     )}
                     <span className="text-base font-bold text-price">
-                      {formatPrice(product.price)}
+                      {formatPrice(Number(product.base_price) * quantity)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center border border-border rounded-md">
                       <button
-                        onClick={() => updateQuantity(product.id, quantity - 1)}
+                        onClick={() => updateQuantity(String(product.id), quantity - 1)}
                         className="p-1.5 hover:bg-muted transition-colors"
                       >
                         <Minus className="h-3 w-3" />
                       </button>
                       <span className="px-3 text-sm font-medium">{quantity}</span>
                       <button
-                        onClick={() => updateQuantity(product.id, quantity + 1)}
+                        onClick={() => updateQuantity(String(product.id), quantity + 1)}
                         className="p-1.5 hover:bg-muted transition-colors"
                       >
                         <Plus className="h-3 w-3" />
@@ -140,7 +140,7 @@ const Cart = () => {
                       </>
                     )}
                     <button
-                      onClick={() => removeFromCart(product.id)}
+                      onClick={() => removeFromCart(String(product.id))}
                       className="p-1.5 text-muted-foreground hover:text-accent transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -171,7 +171,7 @@ const Cart = () => {
                     {formatPrice(totalPrice)}
                   </span>
                 </div>
-                {items[0]?.product.installments && (
+                {items[0]?.product.attributes && (
                   <p className="text-xs text-muted-foreground">
                     ou em até{" "}
                     <span className="font-semibold text-foreground">

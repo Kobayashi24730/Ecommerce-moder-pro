@@ -1,14 +1,14 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import type { Product } from "@/data/mockProducts";
+import type { TPProduct } from "@/types/types";
 
 export interface CartItem {
-  product: Product;
+  product: TPProduct;
   quantity: number;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product, quantity?: number) => void;
+  addToCart: (product: TPProduct, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -21,7 +21,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  const addToCart = (product: Product, quantity = 1) => {
+  const addToCart = (product: TPProduct, quantity = 1) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.product.id === product.id);
       if (existing) {
@@ -36,7 +36,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeFromCart = (productId: string) => {
-    setItems((prev) => prev.filter((i) => i.product.id !== productId));
+    setItems((prev) => prev.filter((i) => String(i.product.id) !== productId));
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -46,7 +46,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
     setItems((prev) =>
       prev.map((i) =>
-        i.product.id === productId ? { ...i, quantity } : i
+        String(i.product.id) === productId ? { ...i, quantity } : i
       )
     );
   };
@@ -55,7 +55,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = items.reduce(
-    (sum, i) => sum + i.product.price * i.quantity,
+    (sum, i) => sum + Number(i.product.base_price) * i.quantity,
     0
   );
 
