@@ -1,5 +1,3 @@
-import { typeboxResolver } from "@hookform/resolvers/typebox/src/typebox.js";
-
 export type ProfileProps = {
     data: User | null;
 }
@@ -13,6 +11,23 @@ export interface TPProductAttribute {
   updated_at?: string;
 }
 
+export interface CartItem {
+  id: number;
+  cart_id: number;
+  product_id: number;
+  name: string;
+  price: string;
+  quantity: number;
+  image: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CartData {
+  id: number;
+  items: CartItem[];
+  subtotal: number;
+}
 export interface TPCompany {
   id: number;
   name: string;
