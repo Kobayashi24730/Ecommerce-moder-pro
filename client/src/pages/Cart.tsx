@@ -11,11 +11,11 @@ const formatPrice = (value: number) =>
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { items, updateQuantity, removeFromCart, totalPrice, totalItems, clearCart } = useCart();
+  const { cart, updateQuantity, removeFromCart, totalPrice, totalItems, clearCart } = useCart();
   const coupon_usado = null;
   const [showOpenList, setShowOpenList] = useState(null);
 
-  if (items.length === 0) {
+  if (cart.items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -61,7 +61,7 @@ const Cart = () => {
               </button>
             </div>
 
-            {items.map(({ product, quantity }) => (
+            {cart.items.map(({ product, quantity }) => (
               <div
                 key={product.id}
                 className="bg-card rounded-lg border border-border p-3 flex gap-3"

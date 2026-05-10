@@ -1,67 +1,174 @@
-import { createContext, useContext, useState, ReactNode } from "react";
-import type { TPProduct } from "@/types/types";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useMemo,
+} from "react";
 
 export interface CartItem {
-  product: TPProduct;
+  id: number;
+  cart_id: number;
+
+  product_id: number;
+
+  name: string;
+
+  price: string;
+
   quantity: number;
+
+  image: string;
+
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CartData {
+  id: number;
+  items: CartItem[];
+  subtotal: number;
 }
 
 interface CartContextType {
-  items: CartItem[];
-  addToCart: (product: TPProduct, quantity?: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  cart: CartData;
+
+  addToCart: (item: CartItem) => void;
+
+  removeFromCart: (productId: number) => void;
+
+  updateQuantity: (productId: number, quantity: number) => void;
+
   clearCart: () => void;
+
   totalItems: number;
+
   totalPrice: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+export const CartProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const [cart, setCart] = useState<CartData>({
+    id: 1,
+    items: [],
+    subtotal: 0,
+  });
 
-  const addToCart = (product: TPProduct, quantity = 1) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id);
+  const calculateSubtotal = (items: CartItem[]) => {
+    return items.reduce(
+      (sum, item) => sum + Number(item.price) * item.quantity,
+      0
+    );
+  };
+
+  const addToCart = (item: CartItem) => {
+    setCart((prev) => {
+      const existing = prev.items.find(
+        (i) => i.product_id === item.product_id
+      );
+
+      let updatedItems: CartItem[];
+
       if (existing) {
-        return prev.map((i) =>
-          i.product.id === product.id
-            ? { ...i, quantity: i.quantity + quantity }
+        updatedItems = prev.items.map((i) =>
+          i.product_id === item.product_id
+            ? {
+                ...i,
+                quantity: i.quantity + item.quantity,
+              }
             : i
         );
+      } else {
+        updatedItems = [...prev.items, item];
       }
-      return [...prev, { product, quantity }];
+
+      return {
+        ...prev,
+        items: updatedItems,
+        subtotal: calculateSubtotal(updatedItems),
+      };
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setItems((prev) => prev.filter((i) => String(i.product.id) !== productId));
+  const removeFromCart = (productId: number) => {
+    setCart((prev) => {
+      const updatedItems = prev.items.filter(
+        (i) => i.product_id !== productId
+      );
+
+      return {
+        ...prev,
+        items: updatedItems,
+        subtotal: calculateSubtotal(updatedItems),
+      };
+    });
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (
+    productId: number,
+    quantity: number
+  ) => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
     }
-    setItems((prev) =>
-      prev.map((i) =>
-        String(i.product.id) === productId ? { ...i, quantity } : i
-      )
-    );
+
+    setCart((prev) => {
+      const updatedItems = prev.items.map((i) =>
+        i.product_id === productId
+          ? {
+              ...i,
+              quantity,
+            }
+          : i
+      );
+
+      return {
+        ...prev,
+        items: updatedItems,
+        subtotal: calculateSubtotal(updatedItems),
+      };
+    });
   };
 
-  const clearCart = () => setItems([]);
+  const clearCart = () => {
+    setCart((prev) => ({
+      ...prev,
+      items: [],
+      subtotal: 0,
+    }));
+  };
 
-  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
-  const totalPrice = items.reduce(
-    (sum, i) => sum + Number(i.product.base_price) * i.quantity,
-    0
-  );
+  const totalItems = useMemo(() => {
+    return cart.items.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+  }, [cart.items]);
+
+  const totalPrice = useMemo(() => {
+    return cart.items.reduce(
+      (sum, item) => sum + Number(item.price) * item.quantity,
+      0
+    );
+  }, [cart.items]);
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice }}
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        totalItems,
+        totalPrice,
+      }}
     >
       {children}
     </CartContext.Provider>
@@ -70,6 +177,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
 export const useCart = () => {
   const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used within CartProvider");
+
+  if (!ctx) {
+    throw new Error(
+      "useCart must be used within CartProvider"
+    );
+  }
+
   return ctx;
 };

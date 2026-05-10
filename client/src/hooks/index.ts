@@ -5,3 +5,5 @@ export { useInfos as useInfosUser } from './profile/infos';
 export { useRead as useReadUser } from './profile/reads';
 export { useStatus as useStatusUser } from './profile/status';
 export { useGet as useGetProducts } from './products/get';
+export { useAdd as useAddToCart } from './cart/add';
+export { useGet as useGetCart } from './cart/get';

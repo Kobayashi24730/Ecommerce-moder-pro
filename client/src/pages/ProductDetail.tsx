@@ -3,16 +3,17 @@ import { useState } from "react";
 import { Star, Truck, ShieldCheck, ChevronLeft, Minus, Plus, ShoppingCart } from "lucide-react";
 import Header from "@/components/ecommerce/Header";
 import Footer from "@/components/ecommerce/Footer";
-import { useGetProducts } from "@/hooks";
+import { useGetProducts, useAddToCart } from "@/hooks";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
+import type { TPProduct } from "@/types/types";
 
 const formatPrice = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const ProductDetail = () => {
+  const { mutate: ToCart } = useAddToCart();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
   const { data: products } = useGetProducts();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -36,15 +37,45 @@ const ProductDetail = () => {
 
   const allImages = product.image?.length ? product.image : [product.image];
 
-  const handleBuyNow = () => {
-    addToCart(product, quantity);
-    navigate("/cart");
+  const handleBuyNow = ( product: TPProduct, quantity ) => {
+    if ( !product || !product.id || !quantity) {
+      console.error("Produto ou quantidade inválidos");
+      return;
+    }
+    ToCart({
+      product: product,
+      quantity: quantity
+    }, {
+      onSuccess: () => {
+        console.log("Produto adicionado ao carrinho com sucesso");
+        navigate("/cart");
+      },
+      onError: () => {
+        console.error("Erro ao adicionar produto ao carrinho");
+        alert("Não foi possível adicionar o produto ao carrinho");
+      }
+    });
   };
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
+  const handleAddToCart = ( product: TPProduct, quantity ) => {
+        if ( !product || !product.id || !quantity) {
+      console.error("Produto ou quantidade inválidos");
+      return;
+    }
+    ToCart({
+      product: product,
+      quantity: quantity
+    }, {
+      onSuccess: () => {
+        console.log("Produto adicionado ao carrinho com sucesso");
+        navigate("/cart");
+      },
+      onError: () => {
+        console.error("Erro ao adicionar produto ao carrinho");
+        alert("Não foi possível adicionar o produto ao carrinho");
+      }
+    });
   };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -171,13 +202,13 @@ const ProductDetail = () => {
               {/* Buttons */}
               <div className="flex flex-col gap-2 mt-5">
                 <Button
-                  onClick={handleBuyNow}
+                  onClick={() => handleBuyNow(product, quantity)}
                   className="w-full h-12 text-base font-bold bg-accent hover:bg-accent/90 text-accent-foreground"
                 >
                   Comprar agora
                 </Button>
                 <Button
-                  onClick={handleAddToCart}
+                  onClick={(() => handleAddToCart(product, quantity))}
                   variant="outline"
                   className="w-full h-12 text-base font-bold border-primary text-primary hover:bg-primary/10"
                 >
