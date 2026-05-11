@@ -7,3 +7,5 @@ export { useStatus as useStatusUser } from './profile/status';
 export { useGet as useGetProducts } from './products/get';
 export { useAdd as useAddToCart } from './cart/add';
 export { useGet as useGetCart } from './cart/get';
+export { useDel as useDelCart} from './cart/del';
+export { useUp as useUpCart} from './cart/up';

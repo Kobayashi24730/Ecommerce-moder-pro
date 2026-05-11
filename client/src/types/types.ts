@@ -50,6 +50,7 @@ export interface TPProduct {
   base_price: string | number; // O Laravel envia decimal como string no JSON
   stock: number;
   image?: string;
+  group_image?: string[];
   
   // Relacionamentos (Eager Loading)
   attributes?: TPProductAttribute[];

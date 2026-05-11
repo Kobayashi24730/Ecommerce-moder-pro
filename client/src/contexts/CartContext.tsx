@@ -1,6 +1,7 @@
 import { createContext, useContext, ReactNode, useMemo, } from "react";
-import { useGetCart } from "@/hooks";
+import { useGetCart, useDelCart, useUpCart } from "@/hooks";
 import { CartData, CartItem } from "@/types/types";
+import { toast } from 'sonner';
 
 interface CartContextType {
   cart: CartData;
@@ -16,6 +17,8 @@ interface CartContextType {
 const CartContext = createContext< CartContextType | undefined >(undefined);
 
 export const CartProvider = ({ children, } : { children: ReactNode; }) => {
+  const { mutate: delToCart } = useDelCart();
+  const { mutate: upToCart } = useUpCart();
   const { data, isLoading } = useGetCart();
   const cart: CartData = data?.data ?? data ?? {
     id: 0,
@@ -24,19 +27,49 @@ export const CartProvider = ({ children, } : { children: ReactNode; }) => {
   };
 
   const addToCart = (item: CartItem) => {
-    console.log("addToCart", item);
+    toast.error("Erro ao adicionar produto ao carrinho. Tente novamente.", {
+      description: 'Função de adicionar ao carrinho ainda não implementada.',
+    });
   };
-
+  
   const removeFromCart = ( productId: number ) => {
-    console.log("remoção do cart: ", productId);
+    if(!productId) {
+      //console.error("Produto inválido");
+      return;
+    }
+    delToCart(Number(productId), {
+        onSuccess: () => { toast.success("Produto removido do carrinho com sucesso!"); },
+        onError: () => {
+          console.error("Erro ao remover produto do carrinho. Tente novamente.");
+          toast.error("Erro ao remover produto do carrinho. Tente novamente.");
+        }
+    });
   };
 
   const updateQuantity = ( productId: number, quantity: number ) => {
-    console.log("update da Qunatity: ", productId, quantity);
+    if(quantity <= 0 ) { removeFromCart(productId); return;}
+    if(!productId || !quantity) {
+      //console.error("Produto ou quantidade inválidos");
+      return;
+    }
+    upToCart({ productId, quantity }, {
+      onSuccess: () => { toast.success("Quantidade do produto atualizada com sucesso!"); },
+       onError: () => {
+        console.error("Erro ao atualizar a quantidade do produto. Tente novamente.");
+        toast.error("Erro ao atualizar a quantidade do produto. Tente novamente.");
+      }
+    });
   };
 
   const clearCart = () => {
-    console.log("Clear do cart");
+    if(cart.items.length === 0) {
+      //alert("O carrinho já está vazio!");
+      return;
+    }
+    cart.items.forEach(item => {
+      removeFromCart(Number(item.product_id));
+    });
+    toast.success("Carrinho limpo com sucesso!");
   };
 
   const totalItems = useMemo(() => {

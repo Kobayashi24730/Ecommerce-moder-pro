@@ -24,7 +24,9 @@ Route::prefix('recuperation')->group(function () {
 });
 Route::apiResource('products', ProductControllers::class);
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('cart', CartControllers::class);
+    Route::apiResource('cart', CartControllers::class)->except(['destroy', 'update']);
+    Route::put('cart', [CartControllers::class, 'update']);
+    Route::delete('cart', [CartControllers::class, 'destroy']);
     Route::post('submit-profile', [UserController::class, 'submit_profile']);
     Route::post('logout', [UserController::class, 'logout']);
     Route::get('user/notifications', function (Request $request) {
@@ -47,15 +49,18 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::put('user/notification', function (Request $request) {
         try {
-            $validate = $request->validate([
-                'id' => 'required|integer',
-                'read' => 'required|boolean'
+            $request->validate([
+                'id' => 'required',
+                'read' => 'required'
             ]);
-            $notification = \App\Models\Notification::where('id', $validate['id'])->where('user_id', request()->user()->id)->first();
+            $id = $request->input('id');
+            $read = $request->input('read');
+            //$find_id = is_array($validate['id']) ? $validate[0] : $validate['id'];
+            $notification = \App\Models\Notification::where('id', $id)->where('user_id', $request->user()->id)->first();
             if(!$notification){
-                return response()->json(['message' => 'Pedido nao encontrado'], 404);
+                return response()->json(['message' => 'Notificacao nao encontrada'], 404);
             }
-            $notification->read = $request->read;
+            $notification->read = $read;
             $notification->save();
             return response()->json($notification);
         } catch (\Exception $e) {

@@ -48,7 +48,12 @@ export async function submitProfile(user: User){
 }
 
 export async function handleRead(user: TPNitifyUser){
-    const response = await api.put('/user/notification', user);
+    console.log(user);
+    const newState = Number(user.read) === 1 ? 0 : 1;
+    const response = await api.put('/user/notification', {
+        id: user.id,
+        read: newState
+    });
     return response.data;
 }
 

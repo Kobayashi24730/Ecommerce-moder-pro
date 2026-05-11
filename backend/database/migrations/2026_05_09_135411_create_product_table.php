@@ -19,6 +19,8 @@ return new class extends Migration
             $table->decimal('base_price', 10, 2);
             $table->string('sku')->unique();
             $table->integer('stock')->default(0);
+            $table->json('group_image')->nullable();
+            $table->string('image')->unique();
             $table->timestamps();
         });
     }

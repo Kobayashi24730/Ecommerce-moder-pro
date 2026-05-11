@@ -3,6 +3,7 @@ import { User as UserIcon, Search, Package, MapPin, CreditCard, Calendar, Clock,
 import { useEffect, useState } from "react";
 import { useInfosUser, useReadUser, useStatusUser  } from "@/hooks";
 import { handleStatusCoupon } from "@/services/users";
+import { toast } from "sonner";
 
 export const Conta = ({ data } : ProfileProps) => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -45,7 +46,7 @@ export const Conta = ({ data } : ProfileProps) => {
     function onSubmitInfos(newData){
         console.log(newData);
         if(newData ==  null || !newData.name || !newData.email){
-            alert("Preencha todos os campos!");
+            toast.error("Preencha todos os campos!");
             return;
         }
         mutateInfos({
@@ -57,11 +58,10 @@ export const Conta = ({ data } : ProfileProps) => {
                 birthDate: newData.birthDate
             },{
                 onSuccess: () => {
-                    alert("Informações alteradas com sucesso!");
-                    window.location.reload();d
+                    toast.success("Informações alteradas com sucesso!");
                 },
                 onError: () => {
-                    alert("Não foi possível alterar as informações")
+                    console.error("Não foi possível alterar as informações")
                 }
         });
     }
@@ -186,9 +186,7 @@ export const Conta = ({ data } : ProfileProps) => {
 
 export const Compras = ({ data }: ProfileProps) => {
     const [searchTerm, setSearchTerm] = useState("");
-    
     const compras = data?.orders || [];
-
     const filteredCompras = compras.filter(c => 
         c.status?.toLowerCase().includes(searchTerm.toLowerCase()) || 
         c.address?.city?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -286,20 +284,19 @@ export const Notificacoes = ({data}: ProfileProps) => {
     const { mutate: mutateRead } = useReadUser();
     const notificacoes = data?.notifications || [];
     function markAsRead(id, status){
-        if(!data) {
-            alert('Erro ao marcar notificação como lida');
+        if(id == null || status == null || status == undefined || id == undefined) {
+            console.error('Erro ao marcar notificação como lida');
             return;
         }
         mutateRead({
             id: id,
-            read: !status
+            read: status
         }, {
             onSuccess: () => {
-                alert('Notificação marcada como lida');
-                window.location.reload();
+                toast.success('Notificação marcada como lida');
             },
             onError: () => {
-                alert('Erro ao marcar notificação como lida');
+                console.error('Erro ao marcar notificação como lida');
             }
         });
     }
@@ -325,7 +322,7 @@ export const Notificacoes = ({data}: ProfileProps) => {
                             </div>
                             <p className="text-sm text-muted-foreground mt-1">{n.message}</p>
                             <div className="mt-3 flex gap-3">
-                                <button type="submit" onClick={() => markAsRead(n.id, n.read)} className="text-xs font-semibold text-primary hover:underline transition-all">Marcar como lida</button>
+                                <button type="submit" onClick={() =>  markAsRead(n.id, n.read)} className="text-xs font-semibold text-primary hover:underline transition-all">Marcar como lida</button>
                                 <button className="text-xs font-semibold text-destructive hover:underline transition-all">Excluir</button>
                             </div>
                         </div>

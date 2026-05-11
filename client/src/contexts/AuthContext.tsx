@@ -4,7 +4,7 @@ import React,{ useEffect, useState, useContext, createContext } from "react";
 import type { User, Notifications } from "@/types/types";
 import { Notificacoes } from '../components/ecommerce/ProfileComponents';
 import { useFetcher } from "react-router-dom";
-
+import { useCart } from './CartContext';
 interface AuthContextData {
     user: any;
     isAuthenticated: boolean;

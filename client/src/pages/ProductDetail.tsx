@@ -35,7 +35,7 @@ const ProductDetail = () => {
     );
   }
 
-  const allImages = product.image?.length ? product.image : [product.image];
+  const allImages = (product?.group_image?.length ?? 0) > 0 ? product?.group_image : [product.image];
 
   const handleBuyNow = ( product: TPProduct, quantity ) => {
     if ( !product || !product.id || !quantity) {

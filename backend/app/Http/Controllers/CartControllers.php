@@ -36,9 +36,13 @@ class CartControllers extends Controller
     public function store(Request $request){
         try {
             $validate = $request->validate([
-                'product_id' => 'required|integer',
+                'product_id' => 'required|integer|exists:product,id',
                 'quantity' => 'required|integer|min:1'
             ]);
+            $product = \App\Models\Product::find($validate['product_id']);
+            if(!$product){
+                return response()->json(['message' => 'Produto não encontrado'], 404);
+            }
             $cart = Cart::firstOrCreate([
                 'user_id' => auth()->id()
             ]);
@@ -50,9 +54,9 @@ class CartControllers extends Controller
                     'cart_id' => $cart->id,
                     'product_id' => $validate['product_id'],
                     'quantity' => $validate['quantity'],
-                    'name' => $request->product ?? 'Produto Desconecido',
-                    'price' => $request->product ?? 0,
-                    'image' => $request->product ?? ''
+                    'name' => $product->name,
+                    'price' => $product->base_price,
+                    'image' => $product->image
                 ]);
             }
 
@@ -74,8 +78,67 @@ class CartControllers extends Controller
     }
 
     public function update(Request $request){
+        try {
+            $validate = $request->validate([
+                'product_id' => 'required|integer|exists:product,id',
+                'quantity' => 'required|integer|min:1'
+            ]);
+            $product = \App\Models\Product::find($validate['product_id']);
+            if(!$product){
+                return response()->json(['message' => 'Produto não encontrado'], 404);
+            }
+            $cart = Cart::where('user_id', auth()->id())->first();
+            if(!$cart){
+                return response()->json(['message' => 'Carrinho não encontrado'], 404);
+            }
+            $cartItem = CartItem::where('cart_id', $cart->id)->where('product_id', $validate['product_id'])->first();
+            if($cartItem) {
+                $cartItem->update([
+                    'quantity' => $validate['quantity'],
+                ]);
+            } else {
+                return response()->json(['message' => 'Produto não encontrado no carrinho'], 404);
+            }
+            return response()->json([
+                'message' => 'Quantidade do produto atualizada',
+                'cart_item' => $cartItem
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'debug' => $e->getLine(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
+        }
     }
 
     public function destroy(Request $request){
+        try {
+            $validate = $request->validate([
+                'product_id' => 'required|integer'
+            ]);
+            $cart = Cart::where('user_id', auth()->id())->first();
+            if(!$cart){
+                return response()->json([ 'message' => 'Carrinho não encontrado' ], 404);
+            }
+            $cartItem = CartItem::where('cart_id', $cart->id)->where('product_id', $validate['product_id'])->first();
+            if($cartItem){
+                $cartItem->delete();
+                return response()->json([
+                    'message' => 'Produto removido do carrinho'
+                ], 200);
+            }
+            return response()->json([
+                'message' => 'Produto não encontrado no carrinho'
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'debug' => $e->getLine(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
+        }
     }
 }
