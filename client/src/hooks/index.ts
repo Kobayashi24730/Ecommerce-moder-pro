@@ -1,11 +1,12 @@
+export { useForget as useForgotUser } from './users/useForgot';
 export { useUser as useAddUser } from './users/useAdd';
 export { useGet as useGetUser } from './users/useGet';
-export { useForget as useForgotUser } from './users/useForgot';
-export { useInfos as useInfosUser } from './profile/infos';
-export { useRead as useReadUser } from './profile/reads';
-export { useStatus as useStatusUser } from './profile/status';
-export { useGet as useGetProducts } from './products/get';
 export { useAdd as useAddToCart } from './cart/add';
 export { useGet as useGetCart } from './cart/get';
 export { useDel as useDelCart} from './cart/del';
 export { useUp as useUpCart} from './cart/up';
+export { useGet as useGetProducts } from './products/get';
+export { useStatus as useStatusUser } from './profile/status';
+export { useInfos as useInfosUser } from './profile/infos';
+export { useRead as useReadUser } from './profile/reads';
+export { useDel as useDeleteUser } from './profile/del';

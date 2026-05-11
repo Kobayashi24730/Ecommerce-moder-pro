@@ -7,6 +7,7 @@ import { useFetcher } from "react-router-dom";
 import { useCart } from './CartContext';
 interface AuthContextData {
     user: any;
+    setUser:React.Dispatch<React.SetStateAction<User | null>>;
     isAuthenticated: boolean;
     loading: boolean;
     login: (credentials: any) => Promise<void>;
@@ -87,7 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadCoupons = async () => {
         if(!user) return;
         try {
-            const response = await api.get('/user/coupons');
+            const response = await api.get('/profile/coupons');
             console.log('Cupons', response.data);
             setUser((prevUser) => {
                 if(!prevUser) return;
@@ -103,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadNotifications = async () => {
         if(!user) return;
         try {
-            const response = await api.get('/user/notifications');
+            const response = await api.get('/profile/notifications');
             console.log('Notificacoes', response.data);
             setUser((prevUser) => {
                 if(!prevUser) return;
@@ -120,7 +121,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadCompras = async () => {
         if(!user) return;
         try {
-            const response = await api.get('/user/orders');
+            const response = await api.get('/profile/orders');
             console.log('Compras', response.data);
             setUser((prevUser) => {
                 if(!prevUser) return;
@@ -136,6 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return (
         <AuthContext.Provider value={{
             user,
+            setUser,
             isAuthenticated: !!user,
             loading,
             login,

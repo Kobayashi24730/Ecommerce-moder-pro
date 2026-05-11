@@ -39,7 +39,7 @@ export async function forgotUser(user: TPForgetUser){
 
 export async function submitProfile(user: User){
     try {
-        const response = await api.post('/submit-profile', user);
+        const response = await api.post('/profile/submit-profile', user);
         return response.data;
     } catch (error: any) {
         console.error("Erro no update:", error.response?.data || error.message);
@@ -50,7 +50,7 @@ export async function submitProfile(user: User){
 export async function handleRead(user: TPNitifyUser){
     console.log(user);
     const newState = Number(user.read) === 1 ? 0 : 1;
-    const response = await api.put('/user/notification', {
+    const response = await api.put('/profile/notification', {
         id: user.id,
         read: newState
     });
@@ -58,6 +58,11 @@ export async function handleRead(user: TPNitifyUser){
 }
 
 export async function handleStatusCoupon(user: TPcouponStatusUser){
-    const response = await api.put('/user/coupons', user);
+    const response = await api.put('/profile/coupon', user);
+    return response.data;
+}
+
+export async function delNotificationFromUser(id: number){
+    const response = await api.delete(`/profile/${id}`);
     return response.data;
 }

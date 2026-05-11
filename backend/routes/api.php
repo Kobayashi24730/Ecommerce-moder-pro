@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CartControllers;
 use App\Http\Controllers\ProductControllers;
+use App\Http\Controllers\ProfileController;
 use App\Models\User;
 use App\Models\Order;
 
@@ -27,82 +28,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('cart', CartControllers::class)->except(['destroy', 'update']);
     Route::put('cart', [CartControllers::class, 'update']);
     Route::delete('cart', [CartControllers::class, 'destroy']);
-    Route::post('submit-profile', [UserController::class, 'submit_profile']);
     Route::post('logout', [UserController::class, 'logout']);
-    Route::get('user/notifications', function (Request $request) {
-        return response()->json($request->user()->notifications);
-    });
-    Route::get('user/coupons', function (Request $request) {
-        try {
-            $user = \App\Models\User::with(['coupons' => function($query) {
-                $query->whereDate('expiry_date', '>=', now()->toDateString());
-            }])->find($request->user()->id);
+    Route::apiResource('profile', ProfileController::class)->except(['GetNotifications', 'getCoupons', 'HandleReadNotification', 'HandleStatusCoupon', 'getOrder']);
+    Route::get('profile/notifications', [UserController::class, 'GetNotifications']);
+    Route::get('profile/coupons', [UserController::class, 'getCoupons']);
+    Route::put('profile/notification', [UserController::class, 'HandleReadNotification']);
+    Route::put('profile/coupons', [UserController::class, 'handleStatusCoupon']);
+    Route::get('profile/orders', [UserController::class, 'getOrder']);
+    Route::post('profile/submit-profile', [UserController::class, 'submit_profile']);
 
-            return response()->json($user->coupons);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'line' => $e->getLine()
-            ], 500);
-        }
-    });
-    Route::put('user/notification', function (Request $request) {
-        try {
-            $request->validate([
-                'id' => 'required',
-                'read' => 'required'
-            ]);
-            $id = $request->input('id');
-            $read = $request->input('read');
-            //$find_id = is_array($validate['id']) ? $validate[0] : $validate['id'];
-            $notification = \App\Models\Notification::where('id', $id)->where('user_id', $request->user()->id)->first();
-            if(!$notification){
-                return response()->json(['message' => 'Notificacao nao encontrada'], 404);
-            }
-            $notification->read = $read;
-            $notification->save();
-            return response()->json($notification);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
-            ], 500);
-        }
-    });
-    Route::put('user/coupons', function (Request $request) {
-        try{
-            $validate = $request->validate([
-                'id' => 'required|integer',
-                'status_id' => 'required|boolean'
-            ]);
-            $coupon = \App\Models\Coupon::where('id', $validate['id'])->first();
-            if(!$coupon){
-                return response()->json(['message' => 'Cupom nao encontrado'], 404);
-            }
-            $coupon->status_id = $request->status_id;
-            $coupon->save();
-            return response()->json($coupon);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
-            ], 500);
-        }
-    });
-    Route::get('/user/orders', function (Request $request) {
-        try {
-            $orders = \App\Models\Order::where('user_id', $request->user()->id)
-                ->with(['items'])
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            return response()->json($orders);
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
-    });
 });
 Route::get('me', [UserController::class, 'me']);

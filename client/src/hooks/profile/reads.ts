@@ -5,21 +5,25 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 export const useRead = () => {
     const queryclient = useQueryClient();
-    const { setUser } = useAuth();
+    const { user, setUser } = useAuth();
     return useMutation({
         mutationFn: (user: TPNitifyUser) => handleRead(user),
         onMutate: async (newData) => {
+            const previounsUser = user;
             setUser((prevUser) => {
                 if(!prevUser) return prevUser;
+                const courentNofication = prevUser.notifications || [];
+                const status = Number(newData.read) === 0 ? 1 : 0;
                 return {
                     ...prevUser,
-                    notifications: prevUser.notifications?.map((n: any) => 
+                    notifications: courentNofication.map((n: any) => 
                         n.id === newData.id
-                        ? { ...newData, read: n.read}
+                        ? { ...n, read: status}
                         : n
                     )
                 };
             });
+            return { previounsUser };
         },
         onSuccess: () => { 
             queryclient.invalidateQueries({ queryKey: ['users'] });
