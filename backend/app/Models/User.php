@@ -35,6 +35,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'preferences' => 'array',
+        'birth_date' => 'date',
         'birthDate' => 'date',
         'two_factor_enabled' => 'boolean',
     ];
@@ -61,7 +62,7 @@ class User extends Authenticatable
     }
 
     public function coupons() {
-        return $this->belongsToMany(Coupon::class); // Geralmente cupons são N para N
+        return $this->belongsToMany(Coupon::class);
     }
 
     public function cart() {

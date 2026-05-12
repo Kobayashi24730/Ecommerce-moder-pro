@@ -187,6 +187,8 @@ export const Conta = ({ data } : ProfileProps) => {
 export const Compras = ({ data }: ProfileProps) => {
     const [searchTerm, setSearchTerm] = useState("");
     const compras = Array.isArray(data?.orders) ? data?.orders : [];
+    const [showDetalhes, setShowDetales] = useState(false);
+    const [idDetalhes, setIdDetalhes] = useState(null);
     const filteredCompras = compras.filter(c => 
         c.status?.toLowerCase().includes(searchTerm.toLowerCase()) || 
         c.address?.city?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -199,7 +201,20 @@ export const Compras = ({ data }: ProfileProps) => {
             </div>
         );
     }
-
+    const HandleDetalhes = ({ id }: { id: number}) => {
+        return (
+            <>
+                {filteredCompras.filter(compra => compra.id === id).map(compra => (
+                    <div className="space-y-4 p-6 border-b border-border ">
+                        <h1 className="text-2xl font-bold text-foreground mb-6 tracking-tight">Detalhes da Compra</h1>
+                        <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground">Status: {compra.status}</p>
+                        </div>
+                    </div>
+                ))}
+            </>
+        );
+    }
     return (
         <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border overflow-hidden">
             <div className="p-6 border-b border-border bg-muted/30">
@@ -260,7 +275,7 @@ export const Compras = ({ data }: ProfileProps) => {
                                     </div>
 
                                     <div className="flex items-center">
-                                        <button className="w-full lg:w-auto px-6 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg font-medium text-sm transition-colors">
+                                        <button onClick={() => {setShowDetales(!showDetalhes); setIdDetalhes(c.id)}} className="w-full lg:w-auto px-6 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg font-medium text-sm transition-colors">
                                             Ver Detalhes
                                         </button>
                                     </div>
@@ -275,6 +290,7 @@ export const Compras = ({ data }: ProfileProps) => {
                         <p className="text-muted-foreground">Você ainda não realizou nenhuma compra ou sua busca não retornou resultados.</p>
                     </div>
                 )}
+                {showDetalhes && <HandleDetalhes id={idDetalhes} />}
             </div>
         </div>
     );
@@ -302,40 +318,40 @@ export const Notificacoes = ({data}: ProfileProps) => {
             console.error('Erro ao excluir notificação');
             return;
         }
-        mutateDelete(id, {
+        mutateDelete(Number(id), {
             onSuccess: () => toast.success('Notificação excluida com sucesso!'),
-            onErro: () => console.error('Erro ao excluir notificação')
+            onError: () => console.error('Erro ao excluir notificação')
         })
     }
     return(
         <div className="space-y-4">
             <h1 className="text-2xl font-bold text-foreground mb-6 tracking-tight">Notificações</h1>
             {notificacoes.length > 0 ? (
-                notificacoes.map((n) => (
-                    <div key={n.id} className="flex items-start gap-4 bg-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-all">
-                        <div className="flex-shrink-0">
-                            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                {n.image ? (
-                                    <img className="h-10 w-10 rounded-full object-cover" src={n.image} alt="Notification" />
-                                ) : (
-                                    <Clock className="h-6 w-6 text-primary" />
-                                )}
+                    notificacoes.map((n, index) => (
+                        <div key={`notif-${n.id}-${index}`} className="flex items-start gap-4 bg-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-all">
+                            <div className="flex-shrink-0">
+                                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                    {n.image ? (
+                                        <img className="h-10 w-10 rounded-full object-cover" src={n.image} alt="Notification" />
+                                    ) : (
+                                        <Clock className="h-6 w-6 text-primary" />
+                                    )}
+                                </div>
                             </div>
+                            <div className="flex-grow">
+                                <div className="flex justify-between items-start">
+                                    <h2 className="font-bold text-foreground leading-tight">{n.title}</h2>
+                                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{n.created_at}</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">{n.message}</p>
+                                <div className="mt-3 flex gap-3">
+                                    <button type="submit" onClick={() =>  markAsRead(n.id, n.read)} className="text-xs font-semibold text-primary hover:underline transition-all">{Number(n.read) === 1 ? "marcar como lida" : "desmarcar como lida" }</button>
+                                    <button type="submit" onClick={() => markAsDelete(n.id)} className="text-xs font-semibold text-destructive hover:underline transition-all">Excluir</button>
+                                </div>
+                            </div>
+                            {!n.read && <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>}
                         </div>
-                        <div className="flex-grow">
-                            <div className="flex justify-between items-start">
-                                <h2 className="font-bold text-foreground leading-tight">{n.title}</h2>
-                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{n.created_at}</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-1">{n.message}</p>
-                            <div className="mt-3 flex gap-3">
-                                <button type="submit" onClick={() =>  markAsRead(n.id, n.read)} className="text-xs font-semibold text-primary hover:underline transition-all">{Number(n.read) === 1 ? "marcar como lida" : "desmarcar como lida" }</button>
-                                <button type="submit" onClick={() => markAsDelete(n.id)} className="text-xs font-semibold text-destructive hover:underline transition-all">Excluir</button>
-                            </div>
-                        </div>
-                        {!n.read && <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>}
-                    </div>
-                ))
+                    ))
             ) : (
                 <div className="text-center py-12 bg-card rounded-xl border border-border">
                     <Clock className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
@@ -367,11 +383,10 @@ export const Coupons =  ({data}: ProfileProps) => {
             name: data?.name
         }, {
             onSuccess: () => {
-                alert('Cupom marcado como usado');
-                window.location.reload();
+                toast.success('Cupom marcado como usado');
             },
             onError: () => {
-                alert('Erro ao marcar cupom como usado');
+                toast.error('Erro ao marcar cupom como usado');
             }
         });
     }

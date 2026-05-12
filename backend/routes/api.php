@@ -29,13 +29,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('cart', [CartControllers::class, 'update']);
     Route::delete('cart', [CartControllers::class, 'destroy']);
     Route::post('logout', [UserController::class, 'logout']);
-    Route::apiResource('profile', ProfileController::class)->except(['GetNotifications', 'getCoupons', 'HandleReadNotification', 'HandleStatusCoupon', 'getOrder']);
-    Route::get('profile/notifications', [UserController::class, 'GetNotifications']);
-    Route::get('profile/coupons', [UserController::class, 'getCoupons']);
-    Route::put('profile/notification', [UserController::class, 'HandleReadNotification']);
-    Route::put('profile/coupons', [UserController::class, 'handleStatusCoupon']);
-    Route::get('profile/orders', [UserController::class, 'getOrder']);
-    Route::post('profile/submit-profile', [UserController::class, 'submit_profile']);
+    Route::apiResource('profile', ProfileController::class);
+    Route::get('profile-data/notifications', [ProfileController::class, 'GetNotifications']);
+    Route::get('profile-data/coupons', [ProfileController::class, 'getCoupons']);
+    Route::put('profile-data/notification', [ProfileController::class, 'HandleReadNotification']);
+    Route::put('profile-data/coupons', [ProfileController::class, 'handleStatusCoupon']);
+    Route::get('profile-data/orders', [ProfileController::class, 'getOrder']);
+    Route::post('profile-data/submit-profile', [ProfileController::class, 'submit_profile']);
 
 });
 Route::get('me', [UserController::class, 'me']);

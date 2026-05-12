@@ -2,23 +2,19 @@ import { Mutation, useMutation, useQueryClient } from '@tanstack/react-query';
 import { submitProfile } from '@/services/users';
 import { User } from '@/types/types';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 export const useInfos = () => {
     const queryclient = useQueryClient();
+    const { setUser } = useAuth();
     return useMutation({
         mutationFn: (user: User) => submitProfile(user),
-        onSuccess: () => {
-            queryclient.invalidateQueries({ queryKey: ['users']});
-            toast.success('Informações atualizadas com sucesso', {
-                description: 'Seus dados foram atualizados.',
-            });
-        },
-        onError: () => toast.error('Não foi possível confirmar o usuário'),
         onMutate: async (newData) => {
             await queryclient.cancelQueries({ queryKey: ['users'] });
             const previounsUser = queryclient.getQueryData(['users']);
-            queryclient.setQueryData(['user'], (old: any) => {
+            setUser((prevUser: any) => {
+                if(!prevUser) return prevUser;
                 return {
-                    ...old,
+                    ...prevUser,
                     name: newData.name,
                     email: newData.email,
                     phone: newData.phone,
@@ -36,6 +32,19 @@ export const useInfos = () => {
                     paymentMethods: newData.paymentMethods
                 }
             });
+            return { previounsUser };
+        },
+        onSuccess: () => {
+            queryclient.invalidateQueries({ queryKey: ['users']});
+            toast.success('Informações atualizadas com sucesso', {
+                description: 'Seus dados foram atualizados.',
+            });
+        },
+        onError: (err, user, context) => {
+            toast.error('Não foi possível confirmar o usuário');
+            if(context?.previounsUser) {
+                queryclient.setQueryData(['users'], context.previounsUser);
+            }
         }
     });
 };

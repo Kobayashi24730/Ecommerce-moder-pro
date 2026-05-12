@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             return JSON.parse(user);
             console.log(user);
         } catch (error) {
-            console.log("Sessao nao autenticada  catch", error);
+            //console.log("Sessao nao autenticada  catch", error);
             return null;
         }
     });
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         userData.birthDateFormatted = "";
                     }
                 }
-                console.log("sessao nao autenticada no loadStorage",userData);
+                //console.log("sessao nao autenticada no loadStorage",userData);
                 loadNotifications();
                 loadCoupons();
                 loadCompras();
@@ -88,8 +88,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadCoupons = async () => {
         if(!user) return;
         try {
-            const response = await api.get('/profile/coupons');
-            console.log('Cupons', response.data);
+            const response = await api.get('/profile-data/coupons');
+            //console.log('Cupons', response.data);
             setUser((prevUser) => {
                 if(!prevUser) return;
                 return {
@@ -104,8 +104,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadNotifications = async () => {
         if(!user) return;
         try {
-            const response = await api.get('/profile/notifications');
-            console.log('Notificacoes', response.data);
+            const response = await api.get('/profile-data/notifications');
+            //console.log('Notificacoes', response.data);
             setUser((prevUser) => {
                 if(!prevUser) return;
                 return {
@@ -121,8 +121,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadCompras = async () => {
         if(!user) return;
         try {
-            const response = await api.get('/profile/orders');
-            console.log('Compras', response.data);
+            const response = await api.get('/profile-data/orders');
+            //console.log('Compras', response.data);
             setUser((prevUser) => {
                 if(!prevUser) return;
                 return {
