@@ -140,7 +140,7 @@ class ProfileController extends Controller
                 'date_of_user' => $validate['date_of_user'] ?? $user->date_of_user,
                 'avatar' => $validate['avatar'] ?? $user->avatar,
                 'preferences' => $validate['preferences'] ?? $user->preferences,
-                'adresses' => $validate['addresses'] ?? $user->addresses,
+                'addresses' => $validate['addresses'] ?? $user->addresses,
             ]);
             return response()->json($user);
         } catch (\Exception $e) {

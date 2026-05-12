@@ -166,15 +166,15 @@ export const Conta = ({ data } : ProfileProps) => {
                     </h2>
                     <div className="space-y-3">
                         <label className="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" defaultChecked={data.preferences?.newsletter} className="h-4 w-4 rounded border-input text-primary focus:ring-primary" />
+                            <input type="checkbox" onClick={() => setNewData({ ...newData, preferences: { ...newData.preferences, newsletter: !newData.preferences?.newsletter}})} defaultChecked={data.preferences?.newsletter} className="h-4 w-4 rounded border-input text-primary focus:ring-primary" />
                             <span className="text-sm group-hover:text-primary transition-colors">Receber Newsletter</span>
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" defaultChecked={data.preferences?.emailNotifications} className="h-4 w-4 rounded border-input text-primary focus:ring-primary" />
+                            <input type="checkbox" onClick={() => setNewData({ ...newData, preferences: { ...newData.preferences, emailNotifications: !newData.preferences?.emailNotifications}})} defaultChecked={data.preferences?.emailNotifications} className="h-4 w-4 rounded border-input text-primary focus:ring-primary" />
                             <span className="text-sm group-hover:text-primary transition-colors">Notificações por Email</span>
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" defaultChecked={data.preferences?.smsNotifications} className="h-4 w-4 rounded border-input text-primary focus:ring-primary" />
+                            <input type="checkbox" onClick={() => setNewData({ ...newData, preferences: {...newData.preferences, smsNotifications: !newData.preferences?.smsNotifications}})}defaultChecked={data.preferences?.smsNotifications} className="h-4 w-4 rounded border-input text-primary focus:ring-primary" />
                             <span className="text-sm group-hover:text-primary transition-colors">Notificações por SMS</span>
                         </label>
                     </div>

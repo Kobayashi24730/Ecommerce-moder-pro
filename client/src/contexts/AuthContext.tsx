@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         userData.birthDateFormatted = "";
                     }
                 }
-                //console.log("sessao nao autenticada no loadStorage",userData);
+                console.log("sessao nao autenticada no loadStorage",userData);
                 loadNotifications();
                 loadCoupons();
                 loadCompras();

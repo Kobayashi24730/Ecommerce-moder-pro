@@ -141,4 +141,22 @@ class CartControllers extends Controller
             ], 500);
         }
     }
+    public function checkout(Request $request) {
+        return DB::transaction(function () use ($request) {
+            $user = $request->user();
+            $cartItem = $request->items;
+            $total = 0;
+            $validate = $request->validate([
+                'user_id' => $user->id,
+                'status' => 'pending',
+                'total' => 0,
+                'address_id' => $request->address_id,
+                'payment_method' => $request->payment_method
+            ]);
+
+            foreach ($cartItem as $item) {
+
+            }
+        });
+    }
 }
