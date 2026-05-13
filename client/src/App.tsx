@@ -8,15 +8,14 @@ import Index from "./pages/Index";
 import SearchResults from "./pages/SearchResults";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import Connection from "./pages/auth/connection";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import path from 'path';
 import { AuthProvider } from "./contexts/AuthContext";
-import Checkout from "./pages/checkout";
 
 const queryClient = new QueryClient();
 
@@ -33,7 +32,7 @@ const App = () => (
               <Route path="/search" element={<SearchResults />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
-              <Route path="/Checkout"element={<Checkout />} />
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />

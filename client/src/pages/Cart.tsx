@@ -189,7 +189,10 @@ const Cart = () => {
                 </p>
               </div>
 
-              <Button onClick={() => navigate("/checkout")} className="w-full mt-4 h-12 text-base font-bold bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button
+                onClick={() => navigate("/checkout")}
+                className="w-full mt-4 h-12 text-base font-bold bg-accent hover:bg-accent/90 text-accent-foreground"
+              >
                 Finalizar compra
               </Button>
 
