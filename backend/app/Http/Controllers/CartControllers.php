@@ -7,6 +7,9 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Product;
+use App\Models\Order;
+
 class CartControllers extends Controller
 {
     public function index(Request $request){
@@ -146,7 +149,7 @@ class CartControllers extends Controller
             $user = $request->user();
             $cartItem = $request->items;
             $total = 0;
-            $validate = $request->validate([
+            $order = Order::create([
                 'user_id' => $user->id,
                 'status' => 'pending',
                 'total' => 0,
@@ -155,8 +158,28 @@ class CartControllers extends Controller
             ]);
 
             foreach ($cartItem as $item) {
+                $product = Product::findOrFail($item['product_id']);
+                if($product->stock >= $item['quantity']) {
+                    throw new \Exception('Quantidade insuficiente em estoque');
+                }
+                $product->decrement('stock', $item['quantity']);
+                $subtotal = $product->base_price * $item['quantity'];
+                $total += $subtotal;
 
+                $order->items()->create([
+                    'user_id' => $user->id,
+                    'total' => $total,
+                    'status' => 'pending',
+                    'address_id' => $request->address_id,
+                    'payment_method' => $request->payment_method
+                ]);
             }
+
+            $order->update(['total' => $total]);
+            return response()->json([
+                'message' => 'Pedido realizado com sucesso',
+                'order' => $order
+            ], 200);
         });
     }
 }
