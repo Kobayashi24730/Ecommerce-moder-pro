@@ -8,6 +8,7 @@ use App\Models\CartItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Product;
+use App\Models\Address;
 use App\Models\Order;
 
 class CartControllers extends Controller
@@ -181,5 +182,38 @@ class CartControllers extends Controller
                 'order' => $order
             ], 200);
         });
+    }
+
+    public function new_adress(Request $request){
+        try {
+            $validate = $request->validate([
+                'user_id' => 'required|integer|exists:user,id',
+                'street' => 'required|string|max:255',
+                'number' => 'required|string|max:255',
+                'complement' => 'string|max:255',
+                'neighborhood' => 'required|string|max:255',
+                'city' => 'required|string|max:255',
+                'state' => 'required|string|max:255',
+                'zipCode' => 'required|string|max:255',
+                'country' => 'required|string|max:255',
+                'isDefault' => 'boolean'
+            ]);
+            $user = $request()->user();
+            if($request->isDefault) {
+                $user->adresses()->update([ 'isDefault' => false ]);
+            }
+            $adress = $user->adresses()->create($validate);
+            return response()->json([
+                'message' => 'Endereço criado com sucesso',
+                'adress' => $adress
+            ], 200);
+        } catch(\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'debug' => $e->getLine(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+        }
     }
 }

@@ -66,3 +66,8 @@ export async function delNotificationFromUser(id: number){
     const response = await api.delete(`/profile/${id}`);
     return response.data;
 }
+
+export async function newAdress(data){
+    const response = await api.post('/profile-data/new-adress', data);
+    return response.data;
+}

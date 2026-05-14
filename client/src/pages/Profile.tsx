@@ -38,6 +38,7 @@ export default function Profile() {
         { id: "cupons", label: "Meus Cupons", icon: Ticket },
     ];
 
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />

@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('profile-data/coupons', [ProfileController::class, 'handleStatusCoupon']);
     Route::get('profile-data/orders', [ProfileController::class, 'getOrder']);
     Route::post('profile-data/submit-profile', [ProfileController::class, 'submit_profile']);
+    Route::post('profile-data/new-adress', [ProfileController::class, 'new_adress']);
 
 });
 Route::get('me', [UserController::class, 'me']);

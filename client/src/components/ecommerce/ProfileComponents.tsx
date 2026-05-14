@@ -1,14 +1,83 @@
 import type { ProfileProps, TPNitifyUser, User as userdata } from "@/types/types";
 import { User as UserIcon, Search, Package, MapPin, CreditCard, Calendar, Clock, Bell, Ticket, Phone, Fingerprint, Mail, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useInfosUser, useReadUser, useStatusUser, useDeleteUser  } from "@/hooks";
+import { useInfosUser, useReadUser, useStatusUser, useDeleteUser, useAddressesUser } from "@/hooks";
 import { handleStatusCoupon } from "@/services/users";
 import { toast } from "sonner";
+
+type Endereco = {
+    id: number;
+    street: string;
+    number: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    isDefault?: boolean;
+};
+
+const EnderecoCard = ({ addr }: { addr: Endereco }) => {
+    const [open, setOpen] = useState(false);
+    return (
+        <div className={`p-4 rounded-lg border ${addr.isDefault ? "border-primary bg-primary/5" : "border-border"}`}>
+            <div className="flex justify-between items-start gap-3">
+                <div className="min-w-0">
+                    <p className="font-bold text-sm truncate">
+                        {addr.street}, {addr.number}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                        {addr.neighborhood}, {addr.city} - {addr.state}
+                    </p>
+                    <p className="text-xs text-muted-foreground">CEP: {addr.zipCode}</p>
+                </div>
+
+                <div className="flex flex-col items-end gap-2">
+                    {addr.isDefault && (
+                        <span className="text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                            Padrão
+                        </span>
+                    )}
+
+                    <button
+                        type="button"
+                        onClick={() => setOpen((v) => !v)}
+                        className="border border-primary px-3 py-1 rounded-lg text-xs font-bold text-primary hover:underline"
+                    >
+                        {open ? "Ocultar" : "Ver detalhes"}
+                    </button>
+                </div>
+            </div>
+
+            {open && (
+                <div className="mt-3 rounded-md bg-muted/20 border border-border p-3">
+                    <p className="text-xs text-muted-foreground">
+                        Rua: <span className="text-foreground font-medium">{addr.street}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        Número: <span className="text-foreground font-medium">{addr.number}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        Bairro: <span className="text-foreground font-medium">{addr.neighborhood}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        Cidade/UF: <span className="text-foreground font-medium">{addr.city} - {addr.state}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        CEP: <span className="text-foreground font-medium">{addr.zipCode}</span>
+                    </p>
+                </div>
+            )}
+        </div>
+    );
+};
 
 export const Conta = ({ data } : ProfileProps) => {
     const [searchTerm, setSearchTerm] = useState("");
     const { mutate: mutateInfos } = useInfosUser();
-    const [newData, setNewData] = useState<userdata>({
+    const { mutate: mutateAddresses } = useAddressesUser();
+    const { showAddresses, setshowAddresses } = useState(false);
+    const [ newData, setNewData ] = useState<userdata>({
         id: 0,
         name: "",
         email: "",
@@ -57,13 +126,28 @@ export const Conta = ({ data } : ProfileProps) => {
                 preferences: newData.preferences,
                 birthDate: newData.birthDate
             },{
-                onSuccess: () => {
-                    toast.success("Informações alteradas com sucesso!");
-                },
-                onError: () => {
-                    console.error("Não foi possível alterar as informações")
-                }
+                onSuccess: () => toast.success("Informações alteradas com sucesso!"),
+                onError: () => console.error("Não foi possível alterar as informações")
         });
+    }
+    
+    const onChangeAddresses = (newData) => {
+        return(
+            <div>
+                <h2>Informe o seu enderesso</h2>
+                <div>
+                    <input />
+                    <button onClick={() => onSubmitAddresses(dataAdresses)}>Salvar</button>
+                </div>
+            </div>
+        )
+    }
+
+    function OnSubmitAddresses(newData) {
+        if(!newData || !newData.name || !newData.id){
+            toast.error("Erro ao authenticar o usuario!");
+            return;
+        }
     }
 
     return(
@@ -133,6 +217,41 @@ export const Conta = ({ data } : ProfileProps) => {
                     </div>
                 </div>
             )}
+
+            {/* Seção: infos checkout */}
+            <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
+                <div className="space-y-4">
+                    <h2 className="text-lg font-bold flex items-center gap-2">
+                        <MapPin className="h-5 w-5 text-primary" />
+                        endereços de entrega
+                    </h2>
+
+                    {Array.isArray(data.addresses) && data.addresses.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {data.addresses.map((addr) => (
+                                <EnderecoCard key={addr.id} addr={addr} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-2">
+                            <p className="text-sm text-muted-foreground">Nenhum endereço cadastrado ainda.</p>
+                        </div>
+                    )}
+                </div>
+
+                <div className="mt-6 flex items-center gap-2">
+                    <p className="text-sm text-muted-foreground">Adicionar novos endereços de entrega</p>
+                    <button
+                        type="button"
+                        onClick={() => setShowAddresses(true)}
+                        className="ml-auto border border-primary px-4 py-2 rounded-lg text-xs font-bold text-primary hover:underline"
+                    >
+                        + Adicionar
+                    </button>
+                </div>
+                {showAddresses && <OnChangeAddresses onClose={() => setShowAddresses(false)} />}
+            </div>
+
 
             {/* Seção: Segurança e Preferências */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

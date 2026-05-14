@@ -10,3 +10,4 @@ export { useStatus as useStatusUser } from './profile/status';
 export { useInfos as useInfosUser } from './profile/infos';
 export { useRead as useReadUser } from './profile/reads';
 export { useDel as useDeleteUser } from './profile/del';
+export { useAddress as useAddressesUser } from './profile/address';
