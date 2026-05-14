@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 loadNotifications();
                 loadCoupons();
                 loadCompras();
+                loadAdress();
                 if(response.data) {
                     setUser(response.data);
                     localStorage.setItem('@App:user', JSON.stringify(userData));
@@ -99,6 +100,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             });
         } catch(error) {
             console.error("Erro ao carregar cupons", error);
+        }
+    }
+
+    const loadAdress = async () => {
+        if(!user) return;
+        try {
+            const response = await api.get('/profile-data/address');
+            setUser((prevUser) => {
+                if(!prevUser) return;
+                return {
+                    ...prevUser,
+                    addresses: response.data
+                }
+            })
+        } catch (error) {
+            console.error("Erro ao carregar enderecos", error);
         }
     }
     const loadNotifications = async () => {

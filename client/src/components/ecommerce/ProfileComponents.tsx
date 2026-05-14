@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useInfosUser, useReadUser, useStatusUser, useDeleteUser, useAddressesUser } from "@/hooks";
 import { handleStatusCoupon } from "@/services/users";
 import { toast } from "sonner";
+import { address } from "framer-motion/client";
 
 type Endereco = {
     id: number;
@@ -15,6 +16,7 @@ type Endereco = {
     zipCode: string;
     country: string;
     isDefault?: boolean;
+    complement: string;
 };
 
 const EnderecoCard = ({ addr }: { addr: Endereco }) => {
@@ -76,7 +78,19 @@ export const Conta = ({ data } : ProfileProps) => {
     const [searchTerm, setSearchTerm] = useState("");
     const { mutate: mutateInfos } = useInfosUser();
     const { mutate: mutateAddresses } = useAddressesUser();
-    const { showAddresses, setshowAddresses } = useState(false);
+    const [ showAddresses, setshowAddresses ] = useState<boolean>(false);
+    const [ newAdress, setNewAdresses ] = useState<Endereco>({
+        id: 0,
+        street: '',
+        number: '',
+        neighborhood: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: 'Brasil',
+        isDefault: false,
+        complement: 'casa'
+    });
     const [ newData, setNewData ] = useState<userdata>({
         id: 0,
         name: "",
@@ -130,24 +144,83 @@ export const Conta = ({ data } : ProfileProps) => {
                 onError: () => console.error("Não foi possível alterar as informações")
         });
     }
-    
-    const onChangeAddresses = (newData) => {
+    const checkCEP = async (cep: string) => {
+        const value = cep.replace(/\D/g, '');
+        if(value.length === 8){
+            try{
+                const response = await fetch(`https://viacep.com.br/ws/${value}/json/`);
+                const data = await response.json();
+                if(!data.erro){
+                    setNewAdresses(prev => ({
+                        ...prev,
+                        street: data.lagroradouro,
+                        neighborhood: data.bairro,
+                        city: data.localidade,
+                        state: data.uf,
+                        zipCode: data.cep
+                    }));
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    }
+    const OnChangeAddresses = () => {
         return(
-            <div>
-                <h2>Informe o seu enderesso</h2>
-                <div>
-                    <input />
-                    <button onClick={() => onSubmitAddresses(dataAdresses)}>Salvar</button>
+            <div className="mt-4 p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 animate-in fade-in slide-in-from-top-4">
+                <h3 className="font-bold mb-4">Novo Endereço de Entrega</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input
+                        type="text" 
+                        placeholder="CEP" 
+                        className="p-2 border rounded-lg"
+                        defaultValue={newAdress.zipCode}
+                        onChange={(e) => checkCEP(e.target.value)} 
+                    />
+                    <input
+                        type="text"
+                        placeholder="Rua" 
+                        className="p-2 border rounded-lg md:col-span-2"
+                        defaultValue={newAdress.street}
+                        onChange={(e) => setNewAdresses({...newAdress, street: e.target.value})}
+                    />
+                    <input
+                        type="text" 
+                        placeholder="Número" 
+                        className="p-2 border rounded-lg"
+                        value={newAdress.number}
+                        onChange={(e) => setNewAdresses({...newAdress, number: e.target.value})}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Bairro" 
+                        className="p-2 border rounded-lg"
+                        value={newAdress.neighborhood}
+                        onChange={(e) => setNewAdresses({...newAdress, neighborhood: e.target.value})}
+                    />
+                    <button 
+                        onClick={() => onSubmitAddresses(newAdress)}
+                        className="bg-primary text-white rounded-lg font-bold hover:bg-primary/90"
+                    >
+                        Confirmar Endereço
+                    </button>
                 </div>
             </div>
         )
     }
 
-    function OnSubmitAddresses(newData) {
-        if(!newData || !newData.name || !newData.id){
-            toast.error("Erro ao authenticar o usuario  ss!");
+    function onSubmitAddresses(newData) {
+        if(!newData || !newData.street | !newData.city){
+            toast.error("Erro ao authenticar o usuario.!");
             return;
         }
+        mutateAddresses(newData,{
+            onSuccess: () => toast.success("Endereço adicionado com sucesso!"),
+            onError: (err) => {
+                console.error('Erro ao adicionar endereço', err);
+                toast.error("Erro ao adicionar endereço");
+            }
+        })
     }
 
     return(
@@ -243,13 +316,13 @@ export const Conta = ({ data } : ProfileProps) => {
                     <p className="text-sm text-muted-foreground">Adicionar novos endereços de entrega</p>
                     <button
                         type="button"
-                        onClick={() => setShowAddresses(true)}
+                        onClick={() => setshowAddresses(true)}
                         className="ml-auto border border-primary px-4 py-2 rounded-lg text-xs font-bold text-primary hover:underline"
                     >
                         + Adicionar
                     </button>
                 </div>
-                {showAddresses && <OnChangeAddresses onClose={() => setShowAddresses(false)} />}
+                {showAddresses && <OnChangeAddresses />}
             </div>
 
 

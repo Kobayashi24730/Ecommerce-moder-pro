@@ -151,4 +151,61 @@ class ProfileController extends Controller
             ]);
         }
     }
+    public function new_adress(Request $request){
+        try {
+            $user = $request->user();
+            if(!$user){
+                return response()->json(['message' => 'Usuario nao encontrado'], 404);
+            }
+            $validate = $request->validate([
+                'street' => 'required|string|max:255',
+                'number' => 'required|string|max:255',
+                'complement' => 'string|max:255',
+                'neighborhood' => 'required|string|max:255',
+                'city' => 'required|string|max:255',
+                'state' => 'required|string|max:255',
+                'zipCode' => 'required|string|max:255',
+                'country' => 'required|string|max:255',
+                'isDefault' => 'boolean'
+            ]);
+            if($request->isDefault) {
+                $user->addresses()->update([ 'isDefault' => false ]);
+            }
+            $adress = $user->addresses()->create([
+                'street' => $validate['street'],
+                'number' => $validate['number'],
+                'complement' => $validate['complement'],
+                'neighborhood' => $validate['neighborhood'],
+                'city' => $validate['city'],
+                'state' => $validate['state'],
+                'zipCode' => $validate['zipCode'],
+                'country' => $validate['country'],
+                'isDefault' => $validate['isDefault'] ?? false
+            ]);
+            return response()->json([
+                'message' => 'Endereço criado com sucesso',
+                'adress' => $adress
+            ], 201);
+        } catch(\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'debug' => $e->getLine(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
+        }
+    }
+    public function getAddress(Request $request){
+        try {
+            $user = $request->user();
+            $adresses = $user->addresses()->get();
+            return response()->json($adresses);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ], 500);
+        }
+    }
 }

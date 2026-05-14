@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile-data/orders', [ProfileController::class, 'getOrder']);
     Route::post('profile-data/submit-profile', [ProfileController::class, 'submit_profile']);
     Route::post('profile-data/new-adress', [ProfileController::class, 'new_adress']);
+    Route::get('profile-data/address', [ProfileController::class, 'getAddress']);
 
 });
 Route::get('me', [UserController::class, 'me']);
