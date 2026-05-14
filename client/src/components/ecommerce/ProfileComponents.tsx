@@ -129,7 +129,7 @@ export const Conta = ({ data } : ProfileProps) => {
     function onSubmitInfos(newData){
         console.log(newData);
         if(newData ==  null || !newData.name || !newData.email){
-            toast.error("Preencha todos os campos!");
+            toast.error("Preencha todos os campos  !");
             return;
         }
         mutateInfos({
