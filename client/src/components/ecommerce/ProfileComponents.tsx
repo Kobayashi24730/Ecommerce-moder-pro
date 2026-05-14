@@ -145,7 +145,7 @@ export const Conta = ({ data } : ProfileProps) => {
 
     function OnSubmitAddresses(newData) {
         if(!newData || !newData.name || !newData.id){
-            toast.error("Erro ao authenticar o usuario!");
+            toast.error("Erro ao authenticar o usuario indos!");
             return;
         }
     }
