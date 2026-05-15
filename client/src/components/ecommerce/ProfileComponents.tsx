@@ -1,5 +1,5 @@
 import type { ProfileProps, TPNitifyUser, User as userdata } from "@/types/types";
-import { User as UserIcon, Search, Package, MapPin, CreditCard, Calendar, Clock, Bell, Ticket, Phone, Fingerprint, Mail, ShieldCheck } from "lucide-react";
+import { User as UserIcon, Search, Package, MapPin, CreditCard, Calendar, Clock, Bell, Ticket, Phone, Fingerprint, Mail, ShieldCheck, Plus, Trash2, Edit2, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useInfosUser, useReadUser, useStatusUser, useDeleteUser, useAddressesUser } from "@/hooks";
 import { handleStatusCoupon } from "@/services/users";
@@ -269,27 +269,66 @@ export const Conta = ({ data } : ProfileProps) => {
                 </button>
             </div>
 
-            {/* Seção: Endereço Padrão */}
-            {data.addresses && data.addresses.length > 0 && (
-                <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
-                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            {/* Seção: Endereços de Entrega */}
+            <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
                         <MapPin className="h-5 w-5 text-primary" />
-                        Endereço de Entrega
+                        Meus Endereços
                     </h2>
+                    <button className="flex items-center gap-2 text-sm font-bold text-primary hover:bg-primary/10 px-3 py-1.5 rounded-lg transition-all">
+                        <Plus className="h-4 w-4" />
+                        Novo Endereço
+                    </button>
+                </div>
+
+                {data.addresses && data.addresses.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {data.addresses.map((addr) => (
-                            <div key={addr.id} className={`p-4 rounded-lg border ${addr.isDefault ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="font-bold text-sm">{addr.street}, {addr.number}</span>
-                                    {addr.isDefault && <span className="text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full">Padrão</span>}
+                            <div key={addr.id} className={`group relative p-5 rounded-xl border-2 transition-all ${addr.isDefault ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
+                                {addr.isDefault && (
+                                    <div className="absolute -top-3 left-4 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                        <Check className="h-3 w-3" /> Padrão
+                                    </div>
+                                )}
+                                
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="space-y-1">
+                                        <p className="font-bold text-base leading-tight">{addr.street}, {addr.number}</p>
+                                        {addr.complement && <p className="text-xs text-muted-foreground italic">{addr.complement}</p>}
+                                    </div>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-all" title="Editar">
+                                            <Edit2 className="h-3.5 w-3.5" />
+                                        </button>
+                                        <button className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all" title="Excluir">
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
                                 </div>
-                                <p className="text-xs text-muted-foreground">{addr.neighborhood}, {addr.city} - {addr.state}</p>
-                                <p className="text-xs text-muted-foreground">CEP: {addr.zipCode}</p>
+
+                                <div className="space-y-1">
+                                    <p className="text-sm text-muted-foreground">{addr.neighborhood}</p>
+                                    <p className="text-sm text-muted-foreground">{addr.city} - {addr.state}</p>
+                                    <p className="text-sm font-medium mt-2">CEP: {addr.zipCode}</p>
+                                </div>
+
+                                {!addr.isDefault && (
+                                    <button className="mt-4 w-full text-xs font-bold text-muted-foreground hover:text-primary py-2 border border-dashed border-border hover:border-primary rounded-lg transition-all">
+                                        Definir como padrão
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
+                        <MapPin className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
+                        <p className="text-muted-foreground">Você ainda não tem endereços cadastrados.</p>
+                        <button className="mt-4 text-sm font-bold text-primary hover:underline">Cadastrar meu primeiro endereço</button>
+                    </div>
+                )}
+            </div>
 
             {/* Seção: infos checkout */}
             <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
