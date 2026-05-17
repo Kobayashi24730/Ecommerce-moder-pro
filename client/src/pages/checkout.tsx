@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { ProfileProps } from "@/types/types";
+import {useAuth} from "@/contexts/AuthContext.tsx";
 
 const formatPrice = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -16,8 +18,25 @@ const formatPrice = (value: number) =>
 const Checkout = () => {
   const navigate = useNavigate();
   const { cart, totalPrice, totalItems } = useCart();
+  const { user, setUser } = useAuth();
   const [step, setStep] = useState(1); // 1: Shipping, 2: Payment, 3: Success
   const [paymentMethod, setPaymentMethod] = useState("credit_card");
+
+  const userData = user ? {
+    ...user,
+    orders: user.orders || [
+      {
+        id: 1024,
+        total: "R$ 250,00",
+        status: "Entregue",
+        createdAt: "20/04/2026",
+        address: { city: "São Paulo" },
+        paymentMethod: { cardBrand: "Visa" }
+      }
+    ],
+    notifications: user.notifications || [],
+    coupons: user.coupons || []
+  } : null;
 
   if (cart.items.length === 0 && step !== 3) {
     navigate("/cart");
@@ -84,18 +103,40 @@ const Checkout = () => {
                     <div className="absolute top-3 right-3">
                       <CheckCircle2 className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="font-bold text-sm mb-1">Principal</p>
-                    <p className="text-sm text-muted-foreground">Rua Exemplo, 123</p>
-                    <p className="text-sm text-muted-foreground">Centro - Cidade Teste, CE</p>
-                    <p className="text-sm text-muted-foreground">CEP: 60000-000</p>
+                    {userData?.addresses?.find(addr => Number(addr.isDefault) === 1) ?  (
+                        (() => {
+                          const addr = userData?.addresses?.find(n => Number(n.isDefault) === 1);
+                          return (
+                                <>
+                                  <p className="font-bold text-sm mb-1">{Number(addr?.isDefault) == 1 ? 'Principal' : 'Secundario'}</p>
+                                  <p className="text-sm text-muted-foreground">{addr?.street}, {addr?.number}</p>
+                                  <p className="text-sm text-muted-foreground">{addr?.city} - {addr?.country}</p>
+                                  <p className="text-sm text-muted-foreground">CEP: {addr?.zipCode}</p>
+                                </>
+                              );
+                            }) ()
+                    ) : (
+                        <div className="border border-red-200 bg-red-50 p-4 rounded-xl text-left">
+                          <p className="text-sm text-red-600 font-medium">Nenhum endereço padrão selecionado.</p>
+                          <Button variant="link" className="p-0 h-auto text-xs" onClick={() => navigate('/profile')}>
+                            Configurar no perfil
+                          </Button>
+                        </div>
+                    )}
                   </div>
-                  <div className="border border-border p-4 rounded-xl hover:border-primary/50 transition-colors cursor-pointer flex items-center justify-center border-dashed">
-                    <p className="text-sm text-muted-foreground font-medium">+ Adicionar novo endereço</p>
+                  <div
+                      onClick={() => navigate('/profile')}
+                      className="border border-border p-4 rounded-xl hover:border-primary/50 transition-colors cursor-pointer flex items-center justify-center border-dashed"
+                  >
+                    <p className="text-sm text-muted-foreground font-medium">+ Adicionar ou alterar endereço</p>
                   </div>
                 </div>
                 {step === 1 && (
                   <Button onClick={() => setStep(2)} className="mt-6 w-full md:w-auto px-8">
-                    Continuar para Pagamento
+                    {
+                      userData?.addresses?.some(addr => Number(addr.isDefault) === 1)
+                        ? "Continuar para Pagamento" : "Selecione um endereço padrão para continuar"
+                    }
                   </Button>
                 )}
               </CardContent>

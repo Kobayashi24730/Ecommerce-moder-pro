@@ -1,85 +1,25 @@
-import type { ProfileProps, TPNitifyUser, User as userdata } from "@/types/types";
+import {
+    ProfileProps,
+    TPEndereco,
+    TPNitifyUser,
+    AdressModalProps,
+    User as userdata,
+} from "@/types/types";
 import { User as UserIcon, Search, Package, MapPin, CreditCard, Calendar, Clock, Bell, Ticket, Phone, Fingerprint, Mail, ShieldCheck, Plus, Trash2, Edit2, Check } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useInfosUser, useReadUser, useStatusUser, useDeleteUser, useAddressesUser } from "@/hooks";
+import { useInfosUser, useReadUser, useStatusUser, useDeleteUser, useAddressesUser, useStantedAddress, useDelAddress } from "@/hooks";
 import { handleStatusCoupon } from "@/services/users";
 import { toast } from "sonner";
 import { address } from "framer-motion/client";
 
-type Endereco = {
-    id: number;
-    street: string;
-    number: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    isDefault?: boolean;
-    complement: string;
-};
-
-const EnderecoCard = ({ addr }: { addr: Endereco }) => {
-    const [open, setOpen] = useState(false);
-    return (
-        <div className={`p-4 rounded-lg border ${addr.isDefault ? "border-primary bg-primary/5" : "border-border"}`}>
-            <div className="flex justify-between items-start gap-3">
-                <div className="min-w-0">
-                    <p className="font-bold text-sm truncate">
-                        {addr.street}, {addr.number}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                        {addr.neighborhood}, {addr.city} - {addr.state}
-                    </p>
-                    <p className="text-xs text-muted-foreground">CEP: {addr.zipCode}</p>
-                </div>
-
-                <div className="flex flex-col items-end gap-2">
-                    {addr.isDefault && (
-                        <span className="text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                            Padrão
-                        </span>
-                    )}
-
-                    <button
-                        type="button"
-                        onClick={() => setOpen((v) => !v)}
-                        className="border border-primary px-3 py-1 rounded-lg text-xs font-bold text-primary hover:underline"
-                    >
-                        {open ? "Ocultar" : "Ver detalhes"}
-                    </button>
-                </div>
-            </div>
-
-            {open && (
-                <div className="mt-3 rounded-md bg-muted/20 border border-border p-3">
-                    <p className="text-xs text-muted-foreground">
-                        Rua: <span className="text-foreground font-medium">{addr.street}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                        Número: <span className="text-foreground font-medium">{addr.number}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                        Bairro: <span className="text-foreground font-medium">{addr.neighborhood}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                        Cidade/UF: <span className="text-foreground font-medium">{addr.city} - {addr.state}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                        CEP: <span className="text-foreground font-medium">{addr.zipCode}</span>
-                    </p>
-                </div>
-            )}
-        </div>
-    );
-};
-
-export const Conta = ({ data } : ProfileProps) => {
+export const Conta = ({data}: ProfileProps) => {
     const [searchTerm, setSearchTerm] = useState("");
     const { mutate: mutateInfos } = useInfosUser();
     const { mutate: mutateAddresses } = useAddressesUser();
+    const { mutate: delAddress } = useDelAddress();
+    const { mutate: standedAddress } = useStantedAddress();
     const [ showAddresses, setshowAddresses ] = useState<boolean>(false);
-    const [ newAdress, setNewAdresses ] = useState<Endereco>({
+    const [ newAdress, setNewAdresses ] = useState<TPEndereco>({
         id: 0,
         street: '',
         number: '',
@@ -126,6 +66,32 @@ export const Conta = ({ data } : ProfileProps) => {
         </div>
     );
 
+    function del(id: number) {
+        if(!id) {
+            console.error('Erro ao coletar o id do address!');
+            return;
+        } delAddress(id,{
+            onSuccess: () => {
+                toast.success('Address processando!');
+            }, onError: () => {
+                toast.error('Erro ao processar address!');
+            }
+        });
+    }
+    function standed(id: number) {
+        if(!id || id === null) {
+            console.error('Erro ao coletar o id do address!');
+            return;
+        } standedAddress(id,{
+            onSuccess: () => {
+                toast.success('Address processando!')
+            },
+            onError: () => {
+                toast.error('Erro ao processar address!');
+            }
+        });
+    }
+
     function onSubmitInfos(newData){
         console.log(newData);
         if(newData ==  null || !newData.name || !newData.email){
@@ -165,56 +131,109 @@ export const Conta = ({ data } : ProfileProps) => {
             }
         }
     }
-    const OnChangeAddresses = () => {
-        return(
-            <div className="mt-4 p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 animate-in fade-in slide-in-from-top-4">
-                <h3 className="font-bold mb-4">Novo Endereço de Entrega</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input
-                        type="text" 
-                        placeholder="CEP" 
-                        className="p-2 border rounded-lg"
-                        defaultValue={newAdress.zipCode}
-                        onChange={(e) => checkCEP(e.target.value)} 
-                    />
-                    <input
-                        type="text"
-                        placeholder="Rua" 
-                        className="p-2 border rounded-lg md:col-span-2"
-                        defaultValue={newAdress.street}
-                        onChange={(e) => setNewAdresses({...newAdress, street: e.target.value})}
-                    />
-                    <input
-                        type="text" 
-                        placeholder="Número" 
-                        className="p-2 border rounded-lg"
-                        value={newAdress.number}
-                        onChange={(e) => setNewAdresses({...newAdress, number: e.target.value})}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Bairro" 
-                        className="p-2 border rounded-lg"
-                        value={newAdress.neighborhood}
-                        onChange={(e) => setNewAdresses({...newAdress, neighborhood: e.target.value})}
-                    />
-                    <button 
-                        onClick={() => onSubmitAddresses(newAdress)}
-                        className="bg-primary text-white rounded-lg font-bold hover:bg-primary/90"
+
+    const OnChangeAddresses = ({ onClose, newAdress, setNewAdress, checkCEP, onSubmmitAddresses } : AdressModalProps) => {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="absolute inset-0" onClick={onClose} />
+
+                <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 md:p-8 transform transition-all animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+                        type="button"
                     >
-                        Confirmar Endereço
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
+
+                    <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Novo Endereço de Entrega
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Campo CEP */}
+                        <div className="flex flex-col gap-1">
+                            <label className="text-xs font-semibold text-slate-500">CEP</label>
+                            <input
+                                type="text"
+                                placeholder="00000-000"
+                                className="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                defaultValue={newAdress.zipCode}
+                                maxLength={8}
+                                onChange={(e) => checkCEP(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Campo Rua */}
+                        <div className="flex flex-col gap-1 md:col-span-2">
+                            <label className="text-xs font-semibold text-slate-500">Rua / Logradouro</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: Avenida Paulista"
+                                className="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                value={newAdress.street}
+                                onChange={(e) => setNewAdresses({...newAdress, street: e.target.value})}
+                            />
+                        </div>
+
+                        {/* Campo Número */}
+                        <div className="flex flex-col gap-1">
+                            <label className="text-xs font-semibold text-slate-500">Número</label>
+                            <input
+                                type="text"
+                                placeholder="Ex: 123"
+                                className="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                value={newAdress.number}
+                                onChange={(e) => setNewAdresses({...newAdress, number: e.target.value})}
+                            />
+                        </div>
+
+                        {/* Campo Bairro */}
+                        <div className="flex flex-col gap-1 md:col-span-2">
+                            <label className="text-xs font-semibold text-slate-500">Bairro</label>
+                            <input
+                                type="text"
+                                placeholder="Seu bairro"
+                                className="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                                value={newAdress.neighborhood}
+                                onChange={(e) => setNewAdresses({...newAdress, neighborhood: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Ações do Modal */}
+                    <div className="mt-8 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            onClick={() => onSubmitAddresses(newAdress)}
+                            className="px-6 py-2.5 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-md shadow-slate-900/10 active:scale-[0.98] transition-all"
+                        >
+                            Confirmar Endereço
+                        </button>
+                    </div>
                 </div>
             </div>
-        )
-    }
+        );
+    };
 
-    function onSubmitAddresses(newData) {
-        if(!newData || !newData.street | !newData.city){
+    function onSubmitAddresses(address: TPEndereco) {
+        if(!address || !address.street || !address.city){
             toast.error("Erro ao authenticar o usuario.!");
             return;
         }
-        mutateAddresses(newData,{
+        mutateAddresses(address,{
             onSuccess: () => toast.success("Endereço adicionado com sucesso!"),
             onError: (err) => {
                 console.error('Erro ao adicionar endereço', err);
@@ -276,12 +295,14 @@ export const Conta = ({ data } : ProfileProps) => {
                         <MapPin className="h-5 w-5 text-primary" />
                         Meus Endereços
                     </h2>
-                    <button className="flex items-center gap-2 text-sm font-bold text-primary hover:bg-primary/10 px-3 py-1.5 rounded-lg transition-all">
+                    <button
+                        onClick={() => setshowAddresses(true)}
+                        className="flex items-center gap-2 text-sm font-bold text-primary hover:bg-primary/10 px-3 py-1.5 rounded-lg transition-all">
                         <Plus className="h-4 w-4" />
                         Novo Endereço
                     </button>
                 </div>
-
+                {showAddresses && <OnChangeAddresses onClose={() => setshowAddresses(false)} newAdress={newAdress} setNewAdress={setNewAdresses} checkCEP={checkCEP} onSubmmitAddresses={onSubmitAddresses} />}
                 {data.addresses && data.addresses.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {data.addresses.map((addr) => (
@@ -301,7 +322,7 @@ export const Conta = ({ data } : ProfileProps) => {
                                         <button className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-all" title="Editar">
                                             <Edit2 className="h-3.5 w-3.5" />
                                         </button>
-                                        <button className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all" title="Excluir">
+                                        <button onClick={() => del(Number(addr.id))} className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all" title="Excluir">
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </button>
                                     </div>
@@ -314,7 +335,7 @@ export const Conta = ({ data } : ProfileProps) => {
                                 </div>
 
                                 {!addr.isDefault && (
-                                    <button className="mt-4 w-full text-xs font-bold text-muted-foreground hover:text-primary py-2 border border-dashed border-border hover:border-primary rounded-lg transition-all">
+                                    <button onClick={() => standed(Number(addr.id))} className="mt-4 w-full text-xs font-bold text-muted-foreground hover:text-primary py-2 border border-dashed border-border hover:border-primary rounded-lg transition-all">
                                         Definir como padrão
                                     </button>
                                 )}
@@ -329,41 +350,6 @@ export const Conta = ({ data } : ProfileProps) => {
                     </div>
                 )}
             </div>
-
-            {/* Seção: infos checkout */}
-            <div className="bg-card text-card-foreground p-6 rounded-xl shadow-sm border border-border">
-                <div className="space-y-4">
-                    <h2 className="text-lg font-bold flex items-center gap-2">
-                        <MapPin className="h-5 w-5 text-primary" />
-                        endereços de entrega
-                    </h2>
-
-                    {Array.isArray(data.addresses) && data.addresses.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {data.addresses.map((addr) => (
-                                <EnderecoCard key={addr.id} addr={addr} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="py-2">
-                            <p className="text-sm text-muted-foreground">Nenhum endereço cadastrado ainda.</p>
-                        </div>
-                    )}
-                </div>
-
-                <div className="mt-6 flex items-center gap-2">
-                    <p className="text-sm text-muted-foreground">Adicionar novos endereços de entrega</p>
-                    <button
-                        type="button"
-                        onClick={() => setshowAddresses(true)}
-                        className="ml-auto border border-primary px-4 py-2 rounded-lg text-xs font-bold text-primary hover:underline"
-                    >
-                        + Adicionar
-                    </button>
-                </div>
-                {showAddresses && <OnChangeAddresses />}
-            </div>
-
 
             {/* Seção: Segurança e Preferências */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -411,6 +397,62 @@ export const Conta = ({ data } : ProfileProps) => {
                     </div>
                 </div>
             </div>
+        </div>
+    );
+};
+
+
+const EnderecoCard = ({ addr }: { addr: TPEndereco }) => {
+    const [open, setOpen] = useState(false);
+    return (
+        <div className={`p-4 rounded-lg border ${addr.isDefault ? "border-primary bg-primary/5" : "border-border"}`}>
+            <div className="flex justify-between items-start gap-3">
+                <div className="min-w-0">
+                    <p className="font-bold text-sm truncate">
+                        {addr.street}, {addr.number}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                        {addr.neighborhood}, {addr.city} - {addr.state}
+                    </p>
+                    <p className="text-xs text-muted-foreground">CEP: {addr.zipCode}</p>
+                </div>
+
+                <div className="flex flex-col items-end gap-2">
+                    {addr.isDefault && (
+                        <span className="text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                            Padrão
+                        </span>
+                    )}
+
+                    <button
+                        type="button"
+                        onClick={() => setOpen((v) => !v)}
+                        className="border border-primary px-3 py-1 rounded-lg text-xs font-bold text-primary hover:underline"
+                    >
+                        {open ? "Ocultar" : "Ver detalhes"}
+                    </button>
+                </div>
+            </div>
+
+            {open && (
+                <div className="mt-3 rounded-md bg-muted/20 border border-border p-3">
+                    <p className="text-xs text-muted-foreground">
+                        Rua: <span className="text-foreground font-medium">{addr.street}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        Número: <span className="text-foreground font-medium">{addr.number}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        Bairro: <span className="text-foreground font-medium">{addr.neighborhood}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        Cidade/UF: <span className="text-foreground font-medium">{addr.city} - {addr.state}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        CEP: <span className="text-foreground font-medium">{addr.zipCode}</span>
+                    </p>
+                </div>
+            )}
         </div>
     );
 };

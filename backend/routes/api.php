@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CartControllers;
 use App\Http\Controllers\ProductControllers;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AddressControllers;
 use App\Models\User;
 use App\Models\Order;
 
@@ -38,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('profile-data/submit-profile', [ProfileController::class, 'submit_profile']);
     Route::post('profile-data/new-adress', [ProfileController::class, 'new_adress']);
     Route::get('profile-data/address', [ProfileController::class, 'getAddress']);
-
+    Route::delete('profile-address/del_address/{id}', [AddressControllers::class, 'delAddress']);
+    Route::put('profile-address/standard_address/{id}', [AddressControllers::class, 'setAddressToStandard']);
 });
 Route::get('me', [UserController::class, 'me']);

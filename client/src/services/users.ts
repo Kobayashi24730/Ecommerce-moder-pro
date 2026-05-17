@@ -71,3 +71,13 @@ export async function newAdress(data){
     const response = await api.post('/profile-data/new-adress', data);
     return response.data;
 }
+
+export async function AddressToStandard(id: number) {
+    const response = await api.put(`/profile-address/standard_address/${id}`);
+    return response.data;
+}
+
+export async function DelAddress(id: number) {
+    const response = await api.delete(`/profile-address/del_address/${id}`);
+    return response.data;
+}

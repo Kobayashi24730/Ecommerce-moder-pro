@@ -61,6 +61,27 @@ export interface TPProduct {
   updated_at: string;
 }
 
+export interface AdressModalProps {
+  onClose: () => void;
+  newAdress: TPEndereco;
+  setNewAdress: React.Dispatch<React.SetStateAction<TPEndereco>>
+  checkCEP: (CEP: string) => Promise<void>;
+  onSubmmitAddresses: (address: TPEndereco) => TPEndereco;
+}
+
+export type TPEndereco = {
+  id: number;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  isDefault?: boolean;
+  complement: string;
+};
+
 export type TPcouponStatusUser = {
     id: number;
     status_id: number;
