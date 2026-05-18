@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ProfileProps } from "@/types/types";
 import {useAuth} from "@/contexts/AuthContext.tsx";
+import PaymentMethod from "@/components/ecommerce/paymentMethodd.tsx";
 
 const formatPrice = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -183,7 +184,7 @@ const Checkout = () => {
                     <span className="text-sm font-bold">Boleto</span>
                   </Label>
                 </RadioGroup>
-
+                <PaymentMethod method={paymentMethod} />
                 {step === 2 && (
                   <div className="mt-8 p-4 bg-muted/50 rounded-lg border border-border">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
