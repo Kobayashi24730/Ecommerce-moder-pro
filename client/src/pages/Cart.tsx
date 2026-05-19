@@ -6,14 +6,20 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import ListCouponsMark from "@/components/ecommerce/listCouponsMark";
 import { useState } from "react";
-
-const formatPrice = (value: number) => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+import {useAuth} from "@/contexts/AuthContext.tsx";
+const formatPrice = (value: number)  => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const Cart = () => {
   const navigate = useNavigate();
   const { cart, updateQuantity, removeFromCart, totalPrice, totalItems, clearCart, } = useCart();
-  const coupon_usado = null;
+  const { user } = useAuth();
+  const data = user ? {
+    ...user,
+    coupons: user.coupons || []
+  } : null
+  const coupon_usado = user?.coupons?.find(c => Number(c.status_id) === 1);
   const [showOpenList, setShowOpenList] = useState(false);
+  const discount = coupon_usado ? Number(coupon_usado.min_value) : 0;
 
   if (cart.items.length === 0) {
     return (
@@ -106,7 +112,7 @@ const Cart = () => {
 
                     {/* Coupon */}
                     <div className="text-xs text-muted-foreground">
-                      {coupon_usado == null ? (
+                      {!coupon_usado ? (
                         <div>
                           Aplique um cupom:{" "}
                           <button
@@ -122,7 +128,15 @@ const Cart = () => {
                         <div>
                           Cupom aplicado:{" "}
                           <span className="text-success font-semibold">
-                            {coupon_usado}
+                            {coupon_usado.code}
+                            <button
+                                onClick={() =>
+                                    setShowOpenList(true)
+                                }
+                                className="text-success font-semibold p-1.5"
+                            >
+                              lista outro coupons
+                            </button>
                           </span>
                         </div>
                       )}
@@ -155,7 +169,7 @@ const Cart = () => {
                   </span>
 
                   <span>
-                    {formatPrice(totalPrice)}
+                    {formatPrice(totalPrice - discount)}
                   </span>
                 </div>
 
@@ -173,7 +187,7 @@ const Cart = () => {
                   </span>
 
                   <span className="text-xl font-extrabold text-price">
-                    {formatPrice(totalPrice)}
+                    {formatPrice(totalPrice - discount)}
                   </span>
                 </div>
 
@@ -182,7 +196,7 @@ const Cart = () => {
                   <span className="font-semibold text-foreground">
                     12x de{" "}
                     {formatPrice(
-                      totalPrice / 12
+                      Number(totalPrice - discount) / 12
                     )}
                   </span>{" "}
                   sem juros

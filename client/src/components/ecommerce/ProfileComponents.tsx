@@ -573,17 +573,19 @@ export const Notificacoes = ({data}: ProfileProps) => {
     const { mutate: mutateRead } = useReadUser();
     const { mutate: mutateDelete } = useDeleteUser();
     const notificacoes = data?.notifications || [];
+    const notiNaoLidas = notificacoes.filter(n => n.read).length;
     function markAsRead(id, status){
         if(id == null || status == null || status == undefined || id == undefined) {
             console.error('Erro ao marcar notificação como lida');
             return;
         }
+        const message = Boolean(status) === true ? "Notificação marcada como lida.": "Notificação desmarcada como lida.";
         mutateRead({
             id: id,
             read: status
         }, {
-            onSuccess: () => toast.success('Notificação marcada como lida'),
-            onError: () => console.error('Erro ao marcar notificação como lida')
+            onSuccess: () => toast.success(message),
+            onError: () => console.error('Erro ao marcar notificação como lida.')
         });
     }
     function markAsDelete(id: number){
@@ -598,7 +600,10 @@ export const Notificacoes = ({data}: ProfileProps) => {
     }
     return(
         <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-foreground mb-6 tracking-tight">Notificações</h1>
+            <div className="space-y-2 p-6 display-flex ">
+                <h1 className="text-2xl font-bold text-foreground mb-6 tracking-tight">Notificações</h1>
+                <small className="border-b-2 border-foreground">{notiNaoLidas} Não lidas</small>
+            </div>
             {notificacoes.length > 0 ? (
                     notificacoes.map((n, index) => (
                         <div key={`notif-${n.id}-${index}`} className="flex items-start gap-4 bg-card p-4 rounded-xl shadow-sm border border-border hover:shadow-md transition-all">
@@ -622,7 +627,7 @@ export const Notificacoes = ({data}: ProfileProps) => {
                                     <button type="submit" onClick={() => markAsDelete(n.id)} className="text-xs font-semibold text-destructive hover:underline transition-all">Excluir</button>
                                 </div>
                             </div>
-                            {!n.read && <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>}
+                            {!!n.read && <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>}
                         </div>
                     ))
             ) : (
@@ -648,7 +653,7 @@ export const Coupons =  ({data}: ProfileProps) => {
         if(!id){
             return console.error('ID do cupom é necessário para marcar como usado');
         }
-        const curentStatus = Number(status) === 1 ? 0 : 1;
+        const curentStatus = Boolean(status) === true ? false : true;
         mutateStatus({
             id: id,
             status_id: curentStatus,
@@ -680,7 +685,7 @@ export const Coupons =  ({data}: ProfileProps) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {coupons.length > 0 ? (
+                    {coupons.length >0 ? (
                         validateCoupons.map((c) => (
                             <tr key={c.id} className="border-b border-border hover:bg-muted/10 transition-colors">
                                 <td className="p-4 flex items-center gap-3">
