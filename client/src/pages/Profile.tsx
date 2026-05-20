@@ -44,24 +44,29 @@ export default function Profile() {
             <Header />
             
             <main className="flex-grow container mx-auto px-4 py-8">
-                <div className="flex flex-col md:flex-row gap-8">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-foreground">Meu Perfil</h1>
+                    <p className="text-muted-foreground mt-1">Gerencie suas informações pessoais, pedidos e preferências</p>
+                </div>
+
+                <div className="flex flex-col lg:flex-row gap-8">
                     {/* Sidebar de Navegação */}
-                    <aside className="w-full md:w-64 flex-shrink-0">
-                        <div className="bg-card rounded-xl shadow-sm border border-border p-4 sticky top-24">
-                            <h2 className="text-xl font-bold mb-6 px-2 tracking-tight">Perfil</h2>
-                            <nav className="space-y-1">
+                    <aside className="w-full lg:w-72 flex-shrink-0">
+                        <div className="bg-card rounded-xl shadow-sm border border-border p-4 sticky top-24 h-fit">
+                            <h2 className="text-lg font-bold mb-4 px-2 text-foreground">Menu</h2>
+                            <nav className="space-y-2">
                                 {menuItems.map((item) => (
                                     <button
                                         key={item.id}
                                         onClick={() => setActive(item.id)}
-                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
                                             active === item.id 
                                             ? "bg-primary text-primary-foreground shadow-md" 
-                                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                                         }`}
                                     >
-                                        <item.icon className="h-4 w-4" />
-                                        {item.label}
+                                        <item.icon className="h-5 w-5" />
+                                        <span>{item.label}</span>
                                     </button>
                                 ))}
                             </nav>
