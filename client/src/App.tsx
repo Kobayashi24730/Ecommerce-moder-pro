@@ -7,7 +7,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import Index from "./pages/Index";
 import SearchResults from "./pages/SearchResults";
 import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
+import { Cart } from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/auth/ForgotPassword";
